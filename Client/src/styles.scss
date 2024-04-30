@@ -1,0 +1,44 @@
+/* You can add global styles to this file, and also import other style files */
+@import '~perfect-scrollbar/css/perfect-scrollbar.css';
+@import '~@icon/ionicons/ionicons.css';
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin       : 0;
+  //font-family: Roboto, "Helvetica Neue", sans-serif;
+  background   : #4680ff !important;
+}
+
+.alert-error {
+  padding         : 20px;
+  background-color: rgb(185, 75, 53) !important;
+  color           : #fff !important;
+  white-space     : pre-line;
+}
+
+.alert-success {
+  padding         : 20px;
+  background-color: rgb(96, 147, 87) !important;
+  color           : #fff !important;
+  white-space     : pre-line;
+}
+
+
+.alert-warning {
+  padding         : 20px;
+  background-color: rgb(219, 216, 30) !important;
+  color           : #fff !important;
+  white-space     : pre-line;
+}
+
+.mat-simple-snackbar-action {
+  button {
+    .mat-button-wrapper {
+      color: #fff !important;
+    }
+  }
+}

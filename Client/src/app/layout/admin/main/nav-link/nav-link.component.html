@@ -1,0 +1,16 @@
+<div class="page-header">
+    <div class="page-header-title">
+        <h3>{{ mainTitle }}</h3>
+    </div>
+    <div class="page-header-body">
+        <mat-icon [inline]="true">home</mat-icon>
+        <ul>
+            <li *ngFor="let nav of navList | keyvalue; let last = last">
+                <span *ngIf="nav.value.url === ''">{{ nav.value.title }}</span>
+                <a *ngIf="nav.value.url !== ''" [routerLink]="nav.value.url">{{ nav.value.title }}</a>
+                <!-- {{nav.key}} : {{nav.value.title}} -->
+                <span *ngIf="!last">/</span>
+            </li>
+        </ul>
+    </div>
+</div>
