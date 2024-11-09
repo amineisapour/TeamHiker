@@ -9,6 +9,7 @@ namespace CrawlerConsole.Domain
     public class SettingsModel
     {
         public required GoogleSheetModel GoogleSheet { get; set; }
+        public required decimal TaskDelay { get; set; }
         //public required CalculatorModel Calculator { get; set; }
         //public required string ViravinNameInSnappShop { get; set; }
 
@@ -21,6 +22,7 @@ namespace CrawlerConsole.Domain
         public required string Name { get; set; }
         public required string ColumnRange { get; set; }
         public required int StartIndex { get; set; }
+        
 
         public required GoogleSheetColumnsIndexModel ColumnIndex { get; set; }
     }

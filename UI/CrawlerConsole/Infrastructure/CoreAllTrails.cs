@@ -16,6 +16,7 @@ using Newtonsoft.Json;
 using Google.Apis.Sheets.v4.Data;
 using Newtonsoft.Json.Serialization;
 using System.Runtime;
+using System.Net.WebSockets;
 
 namespace CrawlerConsole.Infrastructure
 {
@@ -81,7 +82,8 @@ namespace CrawlerConsole.Infrastructure
             {
                 driver.Navigate().GoToUrl("https://www.alltrails.com/login");
 
-                await Task.Delay(5000);
+                //await Task.Delay(5000);
+                await Task.Delay((int)(_settings.TaskDelay * 1000));
 
                 // Find the username and password fields and enter the credentials
                 //driver.FindElement(By.Id("userEmail")).SendKeys("");
@@ -95,7 +97,7 @@ namespace CrawlerConsole.Infrastructure
                 // Optionally, you can click the button
                 submitButton.Click();
 
-                await Task.Delay(5000);
+                await Task.Delay((int)(_settings.TaskDelay * 1000));
 
                 driver.Navigate().GoToUrl("https://www.alltrails.com/canada");
             }
@@ -115,7 +117,7 @@ namespace CrawlerConsole.Infrastructure
 
                 showMoreButton.Click();
 
-                await Task.Delay(5000);
+                await Task.Delay((int)(_settings.TaskDelay * 1000));
             }
 
             var linkElements = driver.FindElements(By.XPath("//a[contains(@class, 'TopResults_resultName')]"));
@@ -172,7 +174,7 @@ namespace CrawlerConsole.Infrastructure
             {
                 driver.Navigate().GoToUrl("https://www.alltrails.com/login");
 
-                await Task.Delay(5000);
+                await Task.Delay((int)(_settings.TaskDelay * 1000));
 
                 // Find the username and password fields and enter the credentials
                 //driver.FindElement(By.Id("userEmail")).SendKeys("");
@@ -186,13 +188,13 @@ namespace CrawlerConsole.Infrastructure
                 // Optionally, you can click the button
                 submitButton.Click();
 
-                await Task.Delay(5000);
+                await Task.Delay((int)(_settings.TaskDelay * 1000));
 
                 driver.Navigate().GoToUrl(url);
             }
 
             bool findBtn = false;
-            int maxReviews = 33;
+            int maxReviews = 50;
             //maxReviews = 1;
             int index = 0;
             do
@@ -211,7 +213,7 @@ namespace CrawlerConsole.Infrastructure
 
                     showMoreButton.Click();
 
-                    await Task.Delay(5000);
+                    await Task.Delay((int)(_settings.TaskDelay * 1000));
 
                     findBtn = true;
                     index++;
@@ -247,7 +249,26 @@ namespace CrawlerConsole.Infrastructure
             }
 
             var scriptTagList = driver.FindElements(By.XPath("//div[contains(@class, 'MO7UyWM1JXXtcVuCt6leqg==')]/div/script[@type='application/ld+json']"));
-            bool isExistSheet = false;
+            
+
+            List<AllTraiReviewModel> allReviews = new List<AllTraiReviewModel>();
+            allReviews.Add( new AllTraiReviewModel
+            {
+                Address = "Address",
+                ReviewBody = "Review Body",
+                ReviewRatingValue = "Review Rating Value",
+                ReviewDate = "Review Date",
+                ReviewAuthor = "Review Author",
+                PageLink = "Page Link",
+                PageTitle = "Page Title",
+                PageAddressMap = "Page Address Map"
+            });
+
+            Console.Clear();
+            Console.WriteLine($"Review Count: {scriptTagList.Count}");
+
+            int reviewIndex = 1;
+
             foreach (var scriptTag in scriptTagList)
             {
                 try
@@ -272,25 +293,10 @@ namespace CrawlerConsole.Infrastructure
                             PageTitle = review.ItemReviewed.Name.Trim(),
                             PageAddressMap = addressMap
                         };
+                        allReviews.Add(model);
 
-                        // create sheet
-                        if (!isExistSheet)
-                        {
-                            isExistSheet = await _googleSheet.CreateNewGoogleSheet(model.PageTitle);
-                            AllTraiReviewModel headerModel = new AllTraiReviewModel
-                            {
-                                Address = "Address",
-                                ReviewBody = "Review Body",
-                                ReviewRatingValue = "Review Rating Value",
-                                ReviewDate = "Review Date",
-                                ReviewAuthor = "Review Author",
-                                PageLink = "Page Link",
-                                PageTitle = "Page Title",
-                                PageAddressMap = "Page Address Map"
-                            };
-                            await _googleSheet.WriteGoogleSheetDataAsync(model.PageTitle, AllTraiReviewMapper.MapToRangeData(headerModel));
-                        }
-                        var result = await _googleSheet.WriteGoogleSheetDataAsync(model.PageTitle, AllTraiReviewMapper.MapToRangeData(model));
+                        Console.WriteLine($"Review #{reviewIndex} => Author: {model.ReviewAuthor} | Date: {model.ReviewDate} | Rate: {model.ReviewRatingValue}");
+                        reviewIndex++;
                     }
                 }
                 catch { }
@@ -301,8 +307,31 @@ namespace CrawlerConsole.Infrastructure
             // Close the browser
             //driver.Close();
             driver.Quit();
-        }
 
+            
+            if (allReviews != null)
+            {
+                Console.Clear();
+                Console.WriteLine($"Review Count For GoogleSheet: {allReviews.Count}");
+                reviewIndex = 1;
+
+                bool isExistSheet = false;
+                var sheetTitel = allReviews.Skip(1).FirstOrDefault().PageTitle;
+                foreach (var review in allReviews)
+                {
+                    // create sheet
+                    if (!isExistSheet)
+                    {
+                        isExistSheet = await _googleSheet.CreateNewGoogleSheet(sheetTitel);
+                        Console.WriteLine("Insert Sheet => Sheet Name: " + sheetTitel);
+                    }
+                    var result = await _googleSheet.WriteGoogleSheetDataAsync(sheetTitel, AllTraiReviewMapper.MapToRangeData(review));
+                    Console.WriteLine($"Review #{reviewIndex} Inserted => User: {review.ReviewAuthor} | Date: {review.ReviewDate} | Rate: {review.ReviewRatingValue}");
+                    reviewIndex++;
+                }
+            }
+            
+        }
 
     }
 }
