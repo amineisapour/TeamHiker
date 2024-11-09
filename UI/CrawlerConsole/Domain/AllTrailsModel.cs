@@ -16,7 +16,7 @@ namespace CrawlerConsole.Domain
     {
         public string PageTitle { get; set; }
         public string PageLink { get; set; }
-        public string PageAddressMap { get; set; }
+        public string PageAddressMap { get; set; } 
         public string Address { get; set; }
         public string ReviewAuthor { get; set; }
         public string ReviewDate { get; set; }
