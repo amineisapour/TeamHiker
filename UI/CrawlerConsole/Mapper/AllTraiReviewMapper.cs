@@ -35,20 +35,27 @@ namespace CrawlerConsole.Mapper
             }
             return items;
         }
-        public static IList<IList<object>> MapToRangeData(AllTraiReviewModel item)
+        public static IList<IList<object>> MapToRangeData(List<AllTraiReviewModel> items)
         {
-            var objectList = new List<object>()
+            var rangeData = new List<IList<object>>();
+            foreach (AllTraiReviewModel item in items)
             {
-                item.PageTitle,
-                item.PageLink,
-                item.PageAddressMap,
-                item.Address,
-                item.ReviewAuthor,
-                item.ReviewDate,
-                item.ReviewRatingValue,
-                item.ReviewBody
-            };
-            var rangeData = new List<IList<object>> { objectList };
+                var objectList = new List<object>()
+                {
+                    item.PageTitle,
+                    item.PageLink,
+                    item.PageAddressMap,
+                    item.Address,
+                    item.ReviewAuthor,
+                    item.ReviewDate,
+                    item.ReviewRatingValue,
+                    item.ReviewBody
+                };
+                rangeData.Add(objectList);
+            }
+            
+            //var rangeData = new List<IList<object>> { objectList };
+
             return rangeData;
         }
     }

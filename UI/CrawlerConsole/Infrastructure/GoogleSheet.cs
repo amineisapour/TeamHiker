@@ -57,13 +57,17 @@ namespace CrawlerConsole.Infrastructure
                 {
                     msg += ", Inner: " + ex.InnerException.Message;
                 }
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"ERROR (GetGoogleSheetDataAsync) => {msg}");
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.ResetColor();
                 //_logger.Error("GetGoogleSheetData: " + msg);
             }
 
             return lists;
         }
 
-        public async Task<bool> WriteGoogleSheetDataAsync(string sheetName,IList<IList<object>> values)
+        public async Task<bool> WriteGoogleSheetDataAsync(string sheetName, IList<IList<object>> values)
         {
             if (_settings == null)
             {
@@ -82,6 +86,7 @@ namespace CrawlerConsole.Infrastructure
                 appendRequest.ValueInputOption = AppendRequest.ValueInputOptionEnum.USERENTERED;
                 //appendRequest.Execute();
                 var response = await appendRequest.ExecuteAsync();
+                await Task.Delay(1000);
             }
             catch (Exception ex)
             {
@@ -91,11 +96,49 @@ namespace CrawlerConsole.Infrastructure
                     msg += ", Inner: " + ex.InnerException.Message;
                 }
                 //_logger.Error("GetGoogleSheetData: " + msg);
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"ERROR (WriteGoogleSheetDataAsync) => {msg}");
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.ResetColor();
                 return false;
             }
             return true;
         }
 
+        public async Task<bool> WriteBatchGoogleSheetDataAsync(string sheetName, IList<IList<object>> values)
+        {
+            if (_settings == null)
+            {
+                return false;
+            }
+            try
+            {
+                var range = $"{sheetName}{_settings.GoogleSheet.ColumnRange}";
+                var valueRange = new ValueRange
+                {
+                    Values = values
+                };
+                var updateRequest = _googleSheetsService.Spreadsheets.Values.Update(valueRange, _settings.GoogleSheet.SpreadId, range);
+                updateRequest.ValueInputOption = SpreadsheetsResource.ValuesResource.UpdateRequest.ValueInputOptionEnum.RAW;
+                var updateResponse = await updateRequest.ExecuteAsync();
+
+            }
+            catch (Exception ex)
+            {
+                var msg = ex.Message;
+                if (ex.InnerException != null && !string.IsNullOrEmpty(ex.InnerException.Message))
+                {
+                    msg += ", Inner: " + ex.InnerException.Message;
+                }
+                //_logger.Error("GetGoogleSheetData: " + msg);
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"ERROR (WriteBatchGoogleSheetDataAsync) => {msg}");
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.ResetColor();
+                return false;
+            }
+            return true;
+        }
 
         public async Task<bool> CreateNewGoogleSheet(string title)
         {
@@ -123,8 +166,17 @@ namespace CrawlerConsole.Infrastructure
 
                 return true;
             }
-            catch
+            catch (Exception ex)
             {
+                var msg = ex.Message;
+                if (ex.InnerException != null && !string.IsNullOrEmpty(ex.InnerException.Message))
+                {
+                    msg += ", Inner: " + ex.InnerException.Message;
+                }
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"ERROR (CreateNewGoogleSheet) => {msg}");
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.ResetColor();
                 return false;
             }
         }

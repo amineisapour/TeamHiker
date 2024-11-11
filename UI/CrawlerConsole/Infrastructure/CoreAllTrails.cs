@@ -17,6 +17,8 @@ using Google.Apis.Sheets.v4.Data;
 using Newtonsoft.Json.Serialization;
 using System.Runtime;
 using System.Net.WebSockets;
+using System.Collections.ObjectModel;
+using OpenQA.Selenium.DevTools.V128.Network;
 
 namespace CrawlerConsole.Infrastructure
 {
@@ -166,68 +168,83 @@ namespace CrawlerConsole.Infrastructure
         private async Task PageCrawl(string url)
         {
             var driver = Driver;
-            driver.Manage().Window.Size = new System.Drawing.Size(1920, 1080);
-            driver.Navigate().GoToUrl(url);
-            var cookies = driver.Manage().Cookies.AllCookies;
-            var cookie = cookies.FirstOrDefault(q => q.Name.ToLower().Equals("refresh_token"));
-            if (cookie == null)
+            try
             {
-                driver.Navigate().GoToUrl("https://www.alltrails.com/login");
-
-                await Task.Delay((int)(_settings.TaskDelay * 1000));
-
-                // Find the username and password fields and enter the credentials
-                //driver.FindElement(By.Id("userEmail")).SendKeys("");
-                //driver.FindElement(By.Id("userEmail")).SendKeys("ali.asadi82@gmail.com");
-                //driver.FindElement(By.Id("userPassword")).SendKeys("");
-                //driver.FindElement(By.Id("userPassword")).SendKeys("a0352amin");
-
-                // Find the button with type="submit" using XPath
-                IWebElement submitButton = driver.FindElement(By.XPath("//button[@type='submit']"));
-
-                // Optionally, you can click the button
-                submitButton.Click();
-
-                await Task.Delay((int)(_settings.TaskDelay * 1000));
-
+                driver.Manage().Window.Size = new System.Drawing.Size(1920, 1080);
                 driver.Navigate().GoToUrl(url);
-            }
-
-            bool findBtn = false;
-            int maxReviews = 50;
-            //maxReviews = 1;
-            int index = 0;
-            do
-            {
-                //var divElement = driver.FindElement(By.XPath("//div[contains(text(), 'Showing results 1 -')]"));
-                //string divText = divElement.Text;
-                //var dataText = divText.Replace("<!-- -->", "").Trim().Split("of ");
-                //var cnt = dataText[1].Trim();
-                try
+                var cookies = driver.Manage().Cookies.AllCookies;
+                var cookie = cookies.FirstOrDefault(q => q.Name.ToLower().Equals("refresh_token"));
+                if (cookie == null)
                 {
-                    IWebElement showMoreButton = driver.FindElement(By.XPath("//button[@data-testid='trail-reviews-show-more']"));
-
-                    Actions actions = new Actions(driver);
-                    actions.MoveToElement(showMoreButton);
-                    actions.Perform();
-
-                    showMoreButton.Click();
+                    driver.Navigate().GoToUrl("https://www.alltrails.com/login");
 
                     await Task.Delay((int)(_settings.TaskDelay * 1000));
 
-                    findBtn = true;
-                    index++;
-                    if (index == maxReviews)
+                    // Find the username and password fields and enter the credentials
+                    //driver.FindElement(By.Id("userEmail")).SendKeys("");
+                    //driver.FindElement(By.Id("userEmail")).SendKeys("ali.asadi82@gmail.com");
+                    //driver.FindElement(By.Id("userPassword")).SendKeys("");
+                    //driver.FindElement(By.Id("userPassword")).SendKeys("a0352amin");
+
+                    // Find the button with type="submit" using XPath
+                    IWebElement submitButton = driver.FindElement(By.XPath("//button[@type='submit']"));
+
+                    // Optionally, you can click the button
+                    submitButton.Click();
+
+                    await Task.Delay((int)(_settings.TaskDelay * 1000));
+
+                    driver.Navigate().GoToUrl(url);
+                }
+
+                bool findBtn = false;
+                int maxReviews = 50;
+                //maxReviews = 1;
+                int index = 0;
+                do
+                {
+                    //var divElement = driver.FindElement(By.XPath("//div[contains(text(), 'Showing results 1 -')]"));
+                    //string divText = divElement.Text;
+                    //var dataText = divText.Replace("<!-- -->", "").Trim().Split("of ");
+                    //var cnt = dataText[1].Trim();
+                    try
+                    {
+                        IWebElement showMoreButton = driver.FindElement(By.XPath("//button[@data-testid='trail-reviews-show-more']"));
+
+                        Actions actions = new Actions(driver);
+                        actions.MoveToElement(showMoreButton);
+                        actions.Perform();
+
+                        showMoreButton.Click();
+
+                        await Task.Delay((int)(_settings.TaskDelay * 1000));
+
+                        findBtn = true;
+                        index++;
+                        if (index == maxReviews)
+                        {
+                            findBtn = false;
+                        }
+                    }
+                    catch
                     {
                         findBtn = false;
                     }
-                }
-                catch
-                {
-                    findBtn = false;
-                }
 
-            } while (findBtn);
+                } while (findBtn);
+            }
+            catch (Exception ex)
+            {
+                var msg = ex.Message;
+                if (ex.InnerException != null && !string.IsNullOrEmpty(ex.InnerException.Message))
+                {
+                    msg += ", Inner: " + ex.InnerException.Message;
+                }
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"ERROR (PageCrawl) => {msg}");
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.ResetColor();
+            }
 
             string addressMap = "";
 
@@ -248,9 +265,28 @@ namespace CrawlerConsole.Infrastructure
                 addressMap = addressMap + item.Name;
             }
 
-            var scriptTagList = driver.FindElements(By.XPath("//div[contains(@class, 'MO7UyWM1JXXtcVuCt6leqg==')]/div/script[@type='application/ld+json']"));
-            
+            ReadOnlyCollection<IWebElement> scriptTagList = null;
+            try
+            {
+                scriptTagList = driver.FindElements(By.XPath("//div[contains(@class, 'MO7UyWM1JXXtcVuCt6leqg==')]/div/script[@type='application/ld+json']"));
+            }
+            catch (Exception ex)
+            {
+                var msg = ex.Message;
+                if (ex.InnerException != null && !string.IsNullOrEmpty(ex.InnerException.Message))
+                {
+                    msg += ", Inner: " + ex.InnerException.Message;
+                }
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"ERROR (PageCrawl) => {msg}");
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.ResetColor();
+            }
 
+            if (scriptTagList == null)
+            {
+                return;
+            }
             List<AllTraiReviewModel> allReviews = new List<AllTraiReviewModel>();
             allReviews.Add( new AllTraiReviewModel
             {
@@ -280,14 +316,32 @@ namespace CrawlerConsole.Infrastructure
                     //string name = json["author"]["name"].ToString();
                     if (review != null)
                     {
-                        IWebElement reviewDate = driver.FindElement(By.XPath($"//span[@data-testid='{review.Author.Name}-secondary-text']"));
+                        string reviewDateTxt = "";
+                        try
+                        {
+                            IWebElement reviewDate = driver.FindElement(By.XPath($"//span[@data-testid='{review.Author.Name}-secondary-text']"));
+                            reviewDateTxt = reviewDate.Text.Trim();
+                        }
+                        catch (Exception ex)
+                        {
+                            var msg = ex.Message;
+                            if (ex.InnerException != null && !string.IsNullOrEmpty(ex.InnerException.Message))
+                            {
+                                msg += ", Inner: " + ex.InnerException.Message;
+                            }
+                            Console.ForegroundColor = ConsoleColor.Red;
+                            Console.WriteLine($"ERROR (PageCrawl) => {msg}");
+                            Console.ForegroundColor = ConsoleColor.White;
+                            Console.ResetColor();
+                        }
+                        
 
                         AllTraiReviewModel model = new AllTraiReviewModel
                         {
                             Address = review.ItemReviewed.Address.AddressLocality,
                             ReviewBody = review.ReviewBody,
                             ReviewRatingValue = review.ReviewRating.RatingValue.ToString(),
-                            ReviewDate = reviewDate.Text.Trim(),
+                            ReviewDate = reviewDateTxt,
                             ReviewAuthor = review.Author.Name,
                             PageLink = "https://www.alltrails.com" + review.ItemReviewed.Id,
                             PageTitle = review.ItemReviewed.Name.Trim(),
@@ -299,7 +353,18 @@ namespace CrawlerConsole.Infrastructure
                         reviewIndex++;
                     }
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    var msg = ex.Message;
+                    if (ex.InnerException != null && !string.IsNullOrEmpty(ex.InnerException.Message))
+                    {
+                        msg += ", Inner: " + ex.InnerException.Message;
+                    }
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine($"ERROR (PageCrawl) => {msg}");
+                    Console.ForegroundColor = ConsoleColor.White;
+                    Console.ResetColor();
+                }
             }
 
             //AllTraiReviewMapper
@@ -311,26 +376,51 @@ namespace CrawlerConsole.Infrastructure
             
             if (allReviews != null)
             {
-                Console.Clear();
+                //Console.Clear();
+                Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine($"Review Count For GoogleSheet: {allReviews.Count}");
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.ResetColor();
                 reviewIndex = 1;
 
                 bool isExistSheet = false;
                 var sheetTitel = allReviews.Skip(1).FirstOrDefault().PageTitle;
-                foreach (var review in allReviews)
+
+                isExistSheet = await _googleSheet.CreateNewGoogleSheet(sheetTitel);
+                Console.WriteLine("Insert Sheet => Sheet Name: " + sheetTitel);
+                var result = await _googleSheet.WriteBatchGoogleSheetDataAsync(sheetTitel, AllTraiReviewMapper.MapToRangeData(allReviews));
+                if (result)
                 {
-                    // create sheet
-                    if (!isExistSheet)
-                    {
-                        isExistSheet = await _googleSheet.CreateNewGoogleSheet(sheetTitel);
-                        Console.WriteLine("Insert Sheet => Sheet Name: " + sheetTitel);
-                    }
-                    var result = await _googleSheet.WriteGoogleSheetDataAsync(sheetTitel, AllTraiReviewMapper.MapToRangeData(review));
-                    Console.WriteLine($"Review #{reviewIndex} Inserted => User: {review.ReviewAuthor} | Date: {review.ReviewDate} | Rate: {review.ReviewRatingValue}");
-                    reviewIndex++;
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine($"Review Inserted => {allReviews.Count}");
+                    Console.ForegroundColor = ConsoleColor.White;
+                    Console.ResetColor();
                 }
+
+                //foreach (var review in allReviews)
+                //{
+                //    // create sheet
+                //    if (!isExistSheet)
+                //    {
+                //        isExistSheet = await _googleSheet.CreateNewGoogleSheet(sheetTitel);
+                //        Console.WriteLine("Insert Sheet => Sheet Name: " + sheetTitel);
+                //    }
+                //    var result = await _googleSheet.WriteGoogleSheetDataAsync(sheetTitel, AllTraiReviewMapper.MapToRangeData(review));
+                //    if (result)
+                //    {
+                //        Console.WriteLine($"Review #{reviewIndex} Inserted => User: {review.ReviewAuthor} | Date: {review.ReviewDate} | Rate: {review.ReviewRatingValue}");
+                //    }
+                //    else
+                //    {
+                //        Console.ForegroundColor = ConsoleColor.Red;
+                //        Console.WriteLine($"Review #{reviewIndex} ERROR => User: {review.ReviewAuthor} | Date: {review.ReviewDate} | Rate: {review.ReviewRatingValue}");
+                //        Console.ForegroundColor = ConsoleColor.White;
+                //        Console.ResetColor();
+                //    }
+                //    reviewIndex++;
+                //}
             }
-            
+
         }
 
     }
