@@ -5,6 +5,9 @@ using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Support.UI;
 using System.Net;
 using HtmlAgilityPack;
+using System.Runtime;
+using System.Reflection;
+using System.Xml.Linq;
 
 namespace Crawler.Infrastructure
 {
@@ -16,11 +19,24 @@ namespace Crawler.Infrastructure
             {
                 var chromeOption = new ChromeOptions();
                 //chromeOption.BinaryLocation = "D:\\TestProjects\\chrome-headless-shell-win64\\chrome-headless-shell.exe";
+
                 //chromeOption.AddArguments("headless");
-                chromeOption.AddArguments(new List<string>() { "no-sandbox", "headless", "disable-gpu" });
-                chromeOption.BrowserVersion = "stable";
-                chromeOption.PageLoadStrategy = OpenQA.Selenium.PageLoadStrategy.None;
+                //chromeOption.AddArgument("--headless");
+
+                //chromeOption.PageLoadStrategy = OpenQA.Selenium.PageLoadStrategy.Normal;
+                chromeOption.PageLoadStrategy = OpenQA.Selenium.PageLoadStrategy.Eager;
+
+                //chromeOption.AddArguments("--blink-settings=imagesEnabled=false");
+                //chromeOption.AddUserProfilePreference("profile.default_content_setting_values.images", 2);
+
                 chromeOption.PlatformName = "windows";
+                chromeOption.BrowserVersion = "stable";
+                chromeOption.AddArguments("start-maximized"); // open Browser in maximized mode
+                chromeOption.AddArguments("--disable-extensions"); // disabling extensions
+                chromeOption.AddArguments("--disable-gpu"); // applicable to windows os only
+                chromeOption.AddArguments("--disable-dev-shm-usage"); // overcome limited resource problems
+                chromeOption.AddArguments("--no-sandbox"); // Bypass OS security model
+                //chromeOption.AddArguments(new List<string>() { "no-sandbox", "headless", "disable-gpu" });
                 chromeOption.AddArguments("disable-infobars");
                 chromeOption.AddExcludedArgument("enable-automation");
                 chromeOption.AddAdditionalChromeOption("useAutomationExtension", false);
@@ -29,7 +45,7 @@ namespace Crawler.Infrastructure
                 chromeOption.AddArguments("--silent");
                 chromeOption.AddArguments("--log-level=3");
                 chromeOption.AddArgument("--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.69 Safari/537.36");
-                chromeOption.AddArgument("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.69 Safari/537.36");
+                //chromeOption.AddArgument("user-data-dir=C:\\Users\\amine\\AppData\\Local\\Google\\Chrome\\User Data");
 
                 var chromeService = ChromeDriverService.CreateDefaultService();
                 chromeService.EnableVerboseLogging = false;
@@ -58,71 +74,312 @@ namespace Crawler.Infrastructure
             return proxies;
         }
 
-        public async Task Crawl(string url)
+        public async Task<Dictionary<string, string>> Crawl1(string url)
         {
-            //List<string> allProxies = await FilterProxiesAsync();
-            // Start the BrowserMob Proxy
-            //var proxyServer = new BrowserMobProxyServer();
-            //proxyServer.Start();
-            //var seleniumProxy = new Proxy { HttpProxy = proxyServer.SeleniumProxy };
+            Dictionary<string, string> result = new();
+            var driver = Driver;
 
-
-            // Add headers to the proxy
-            //proxyServer.NewHar("tripadvisor");
-            //proxyServer.AddHeader("Access-Control-Allow-Origin", "*");
-            //proxyServer.AddHeader("Access-Control-Allow-Methods", "GET");
-            //proxyServer.AddHeader("Access-Control-Allow-Headers", "Content-Type");
-            //proxyServer.AddHeader("accept", "*/*");
-            //proxyServer.AddHeader("accept-encoding", "gzip, deflate");
-            //proxyServer.AddHeader("accept-language", "en,mr;q=0.9");
-            //proxyServer.AddHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.69 Safari/537.36");
-
-            // Initialize the Chrome driver
-            var chromeOption = new ChromeOptions();
-            chromeOption.BinaryLocation = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
-            //chromeOption.AddArguments("headless");
-            //chromeOption.AddArguments(new List<string>() { "no-sandbox", "headless", "disable-gpu" });
-            //chromeOption.BrowserVersion = "stable";
-            //chromeOption.PageLoadStrategy = OpenQA.Selenium.PageLoadStrategy.None;
-            //chromeOption.PlatformName = "windows";
-            //chromeOption.AddArguments("disable-infobars");
-            //chromeOption.AddExcludedArgument("enable-automation");
-            //chromeOption.AddAdditionalChromeOption("useAutomationExtension", false);
-            //chromeOption.Proxy = null;
-            //chromeOption.AddArguments("--disable-logging");
-            //chromeOption.AddArguments("--silent");
-            //chromeOption.AddArguments("--log-level=3");
-            chromeOption.AddArgument("--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.69 Safari/537.36");
-            //chromeOption.AddArgument("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.69 Safari/537.36");
-
-            var chromeService = ChromeDriverService.CreateDefaultService();
-            //chromeService.EnableVerboseLogging = false;
-            //chromeService.DisableBuildCheck = false;
-            //chromeService.SuppressInitialDiagnosticInformation = true;
-            //chromeService.HideCommandPromptWindow = true;
-            var driver = new ChromeDriver(chromeService, chromeOption);
-            //using var driver = Driver;
-
-            // Navigate to the URL
-            driver.Navigate().GoToUrl(url);
-
-            // Wait for the page to load and the specific elements to be present
-            //var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
-            //wait.Until(d => d.FindElement(By.CssSelector("div.all-results-section")));
-
-            // Find all div elements with the class "XllAv H4 _a"
-            var reviewElements = driver.FindElements(By.CssSelector("SVuzf e"));
-
-            // Print the text of each review element
-            foreach (var element in reviewElements)
+            WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(1));
+            string titles = string.Empty;
+            int index = 0;
+            int repeatCount = 30;
+        here:
+            do
             {
-                Console.WriteLine(element.Text);
+                if (index == 0)
+                {
+                    driver.Navigate().GoToUrl(url);
+                }
+                try
+                {
+                    if (index > 0)
+                    {
+                        await driver.Navigate().RefreshAsync();
+                    }
+
+                    await Task.Delay(500);
+
+                    IWebElement titleDivElement = wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementExists(By.CssSelector("div[class*='Titles_titles']")));
+                    titles = titleDivElement.Text;
+                    if (string.IsNullOrEmpty(titles))
+                    {
+                        index++;
+                        //Console.WriteLine($"Not Found {url} ({index})");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Found {url} ({index})");
+                        index = repeatCount;
+                    }
+                }
+                catch
+                {
+                    try
+                    {
+                        IWebElement unavailableDivElement = wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementExists(By.CssSelector("div[class*='BuyBox_unavailable-buy-box']")));
+                        index = repeatCount;
+                        titles = "کالا ناموجود\r\nUnavailable Product";
+                        break;
+                    }
+                    catch { }
+
+                    try
+                    {
+                        IWebElement error404DivElement = wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementExists(By.CssSelector("button[class*='error-container_error']")));
+                        index = repeatCount;
+                        titles = "صفحه مورد نظر یافت نشد 404\r\nPage not found 404";
+                        break;
+                    }
+                    catch { }
+                    index++;
+                }
+            }
+            while (index < repeatCount);
+
+
+            driver.Quit();
+            var listTitle = titles.Trim().Split("\r\n");
+
+
+            Dictionary<string, string> name = new Dictionary<string, string>();
+            if (listTitle != null)
+            {
+                if (listTitle.Length > 0 && !String.IsNullOrEmpty(listTitle[0]))
+                {
+                    name.Add("fa", listTitle[0]);
+                }
+                else
+                {
+                    name.Add("fa", "");
+                }
+
+                if (listTitle.Length > 1 && !String.IsNullOrEmpty(listTitle[1]))
+                {
+                    name.Add("en", listTitle[1]);
+                }
+                else
+                {
+                    name.Add("en", "");
+                }
+                if (name["en"] != "")
+                {
+                    result.Add($"{url} ({index})", name["en"]);
+                }
+                else
+                {
+                    result.Add($"{url} ({index})", name["fa"]);
+                }
             }
 
-            // Close the browser
-            driver.Quit();
-            //driver.Close();
 
+            return result;
+        }
+
+        public async Task<Dictionary<string, string>> Crawl2(string url)
+        {
+            Dictionary<string, string> result = new();
+            using var driver = Driver;
+
+            string titles = string.Empty;
+            int index = 0;
+        here:
+
+            try
+            {
+                if (index == 0)
+                {
+                    driver.Navigate().GoToUrl(url);
+                }
+                if (index > 0)
+                {
+                    await driver.Navigate().RefreshAsync();
+                }
+                await Task.Delay((int)(0.5 * 1000));
+                WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(3));
+                IWebElement titleDivElement = wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementExists(By.CssSelector("div[class*='Titles_titles']")));
+                titles = titleDivElement.Text;
+                if (string.IsNullOrEmpty(titles))
+                {
+                    index++;
+                    Console.WriteLine($"Not Found {url} ({index})");
+                    goto here;
+                }
+                else
+                {
+                    Console.WriteLine($"Found {url} ({index})");
+                    //index = repeatCount;
+                }
+            }
+            catch
+            {
+                index++;
+                goto here;
+            }
+
+            driver.Quit();
+            var listTitle = titles.Trim().Split("\r\n");
+
+
+            Dictionary<string, string> name = new Dictionary<string, string>();
+            if (listTitle != null)
+            {
+                if (listTitle.Length > 0 && !String.IsNullOrEmpty(listTitle[0]))
+                {
+                    name.Add("fa", listTitle[0]);
+                }
+                else
+                {
+                    name.Add("fa", "");
+                }
+
+                if (listTitle.Length > 1 && !String.IsNullOrEmpty(listTitle[1]))
+                {
+                    name.Add("en", listTitle[1]);
+                }
+                else
+                {
+                    name.Add("en", "");
+                }
+                if (name["en"] != "")
+                {
+                    result.Add($"{url} ({index})", name["en"]);
+                }
+                else
+                {
+                    result.Add($"{url} ({index})", name["fa"]);
+                }
+            }
+
+
+            return result;
+        }
+
+        public async Task<ChromeDriver?> InitializeCrawler(string url, int repeatCount = 30, decimal delay = 0.5m)
+        {
+            bool find = false;
+            try
+            {
+                ChromeDriver driver = Driver;
+            }
+            WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(1));
+            string titles = string.Empty;
+            int index = 0;
+            do
+            {
+                try
+                {
+                    if (index == 0)
+                    {
+                        driver.Navigate().GoToUrl(url);
+                    }
+                    if (index > 0)
+                    {
+                        await driver.Navigate().RefreshAsync();
+                    }
+
+
+                    await Task.Delay((int)(delay * 1000));
+
+                    IWebElement titleDivElement = wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementExists(By.CssSelector("div[class*='Titles_titles']")));
+                    titles = titleDivElement.Text;
+                    if (string.IsNullOrEmpty(titles))
+                    {
+                        index++;
+                    }
+                    else
+                    {
+                        find = true;
+                        index = repeatCount;
+                    }
+                }
+                catch
+                {
+                    index++;
+                    try
+                    {
+                        IWebElement unavailableDivElement = wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementExists(By.CssSelector("div[class*='BuyBox_unavailable-buy-box']")));
+                        find = false;
+                        index = repeatCount;
+                    }
+                    catch { }
+
+                    try
+                    {
+                        IWebElement error404DivElement = wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementExists(By.CssSelector("button[class*='error-container_error']")));
+                        find = false;
+                        index = repeatCount;
+                    }
+                    catch { }
+                }
+            }
+            while (index < repeatCount);
+
+            if (find)
+            {
+                return driver;
+            }
+
+            driver.Quit();
+            return null;
+        }
+
+        public async Task<Dictionary<string, string>> Crawl3(string url)
+        {
+            var driver = Driver;
+            Dictionary<string, string> result = await Crawl4(Driver, url);
+            driver.Quit();
+
+            return result;
+        }
+        public async Task<Dictionary<string, string>> Crawl4(ChromeDriver? driver, string url)
+        {
+            Dictionary<string, string> result = new();
+
+            driver = driver != null ? await InitializeCrawler(driver, url, 30, 0.5m) : null;
+            //driver = null;
+            //driver ??= await InitializeCrawler(driver, url, 30, 0.5m);
+            if (driver != null) 
+            {
+                var titleDivElement = driver.FindElement(By.CssSelector("div[class*='Titles_titles']"));
+                var titles = titleDivElement.Text;
+                Console.WriteLine($"Found {url}");
+                var listTitle = titles.Trim().Split("\r\n");
+
+                Dictionary<string, string> name = new Dictionary<string, string>();
+                if (listTitle != null)
+                {
+                    if (listTitle.Length > 0 && !String.IsNullOrEmpty(listTitle[0]))
+                    {
+                        name.Add("fa", listTitle[0]);
+                    }
+                    else
+                    {
+                        name.Add("fa", "");
+                    }
+
+                    if (listTitle.Length > 1 && !String.IsNullOrEmpty(listTitle[1]))
+                    {
+                        name.Add("en", listTitle[1]);
+                    }
+                    else
+                    {
+                        name.Add("en", "");
+                    }
+
+                    if (name["en"] != "")
+                    {
+                        result.Add(url, name["en"]);
+                    }
+                    else
+                    {
+                        result.Add(url, name["fa"]);
+                    } 
+                }
+
+                driver.Quit();
+            }
+
+            return result;
         }
     }
 }

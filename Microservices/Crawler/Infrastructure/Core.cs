@@ -10,15 +10,18 @@ namespace Crawler.Infrastructure
     public class Core
     {
 
-        public async Task Crawl(string url)
+        public async Task<string> Crawl(string url)
         {
             var options = new LaunchOptions
             {
                 Headless = false,
-                ExecutablePath = @"D:\TestProjects\chrome-headless-shell-win64\chrome-headless-shell.exe"
-                //ExecutablePath = "D:\\TestProjects\\chrome-win64\\chrome.exe"
+                //ExecutablePath = @"D:\TestProjects\chrome-headless-shell-win64\chrome-headless-shell.exe"
+                ExecutablePath = "D:\\TestProjects\\chrome-win64\\chrome.exe",
+                //Args = ["--start-fullscreen", "--window-size=1920,1040"]
+                Args = ["--window-size=1920,1040"]
             };
 
+            
             // Launch the browser
             await using var browser = await Puppeteer.LaunchAsync(options);
 
@@ -49,30 +52,37 @@ namespace Crawler.Infrastructure
 
             //await page.GoToAsync(url, 0, [WaitUntilNavigation.DOMContentLoaded]);
             await page.GoToAsync(url, WaitUntilNavigation.Networkidle2);
+            //await page.SetViewportAsync(new ViewPortOptions
+            //{
+            //    Width = 1920,
+            //    Height = 1080,
+            //    DeviceScaleFactor = 1,
+            //});
 
             var html = await page.GetContentAsync();
 
             //var cooki = await page.GetCookiesAsync();
 
-            WaitForSelectorOptions selectorOptions = new WaitForSelectorOptions
-            {
-                Timeout = 0
-            };
+            //WaitForSelectorOptions selectorOptions = new WaitForSelectorOptions
+            //{
+            //    Timeout = 0
+            //};
 
-            await page.WaitForSelectorAsync("div.all-results-section", selectorOptions);
+            //await page.WaitForSelectorAsync("div.all-results-section", selectorOptions);
 
-            // Evaluate JavaScript in the context of the page to get the desired elements
-            var divElements = await page.EvaluateExpressionAsync<string[]>(@"Array.from(document.querySelectorAll('div.kgrOn.o')).map(div => div.outerHTML);");
+            //// Evaluate JavaScript in the context of the page to get the desired elements
+            //var divElements = await page.EvaluateExpressionAsync<string[]>(@"Array.from(document.querySelectorAll('div.kgrOn.o')).map(div => div.outerHTML);");
 
-            // Print the outer HTML of each div element
-            foreach (var div in divElements)
-            {
-                var di = div;
-                //Console.WriteLine(div);
-            }
+            //// Print the outer HTML of each div element
+            //foreach (var div in divElements)
+            //{
+            //    var di = div;
+            //    //Console.WriteLine(div);
+            //}
 
             // Close the browser
             await browser.CloseAsync();
+            return html;
         }
     }
 }

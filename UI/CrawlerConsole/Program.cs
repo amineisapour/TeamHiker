@@ -1,4 +1,5 @@
-﻿using CrawlerConsole.Domain;
+﻿using CrawlerConsole.Cache;
+using CrawlerConsole.Domain;
 using CrawlerConsole.Helper;
 using CrawlerConsole.Infrastructure;
 using Microsoft.Extensions.Configuration;
@@ -35,6 +36,7 @@ namespace CrawlerConsole
                 .AddSingleton(typeof(GoogleSheetsHelper))
                 .AddSingleton<GoogleSheet>()
                 .AddSingleton<CoreAllTrails>()
+                .AddSingleton<CacheService>()
                 .AddScoped<IConfiguration>(_ => configuration)
                 .BuildServiceProvider();
 

@@ -25,6 +25,7 @@ namespace Crawler.Infrastructure
 
         static async Task<List<string>> FilterProxiesAsync()
         {
+
             var proxies = new List<string>();
             using var httpClient = new HttpClient();
             var response = await httpClient.GetStringAsync("https://www.sslproxies.org/");
