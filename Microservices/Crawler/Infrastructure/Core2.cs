@@ -257,10 +257,7 @@ namespace Crawler.Infrastructure
         public async Task<ChromeDriver?> InitializeCrawler(string url, int repeatCount = 30, decimal delay = 0.5m)
         {
             bool find = false;
-            try
-            {
-                ChromeDriver driver = Driver;
-            }
+            ChromeDriver driver = Driver;
             WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(1));
             string titles = string.Empty;
             int index = 0;
@@ -335,7 +332,7 @@ namespace Crawler.Infrastructure
         {
             Dictionary<string, string> result = new();
 
-            driver = driver != null ? await InitializeCrawler(driver, url, 30, 0.5m) : null;
+            //driver = driver != null ? await InitializeCrawler(driver, url, 30, 0.5m) : null;
             //driver = null;
             //driver ??= await InitializeCrawler(driver, url, 30, 0.5m);
             if (driver != null) 

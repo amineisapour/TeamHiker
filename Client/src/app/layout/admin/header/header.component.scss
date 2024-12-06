@@ -50,11 +50,12 @@ h1.main-app-name {
     .top-navigtaion {
         #btnNotification {
             padding-right: 0 !important;
-            float        : right !important;
+            //float        : right !important;
         }
 
         #btnProfile {
-            display: none;
+            padding-right: 0 !important;
+            //float        : right !important;
         }
     }
 }
@@ -70,6 +71,9 @@ h1.main-app-name {
 }
 
 .profile-head {
+
+    width: 300px !important;
+
     border-bottom: 1px solid #0c1527;
     background   : #0f192f;
     padding      : 18px 20px 55px;

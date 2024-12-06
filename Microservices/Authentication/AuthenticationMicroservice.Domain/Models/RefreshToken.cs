@@ -26,5 +26,7 @@ namespace AuthenticationMicroservice.Domain.Models
         public bool IsExpired => DateTime.Now >= Expires;
         public bool IsRevoked => Revoked != null;
         public bool IsActive => !IsRevoked && !IsExpired;
+
+        public virtual User User { get; set; }
     }
 }

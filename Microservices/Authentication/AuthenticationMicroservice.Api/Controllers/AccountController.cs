@@ -52,8 +52,8 @@ namespace AuthenticationMicroservice.Api.Controllers
                     }
                     return result.ConvertToDtxResult();
                 }
-                //var user = await GetUserAsync(loginUser.Username);
-                User user = null;
+                var user = await GetUserAsync(loginUser.Username);
+                //User user = null;
                 if (user == null)
                 {
                     result.WithError(errorMessage: Resources.Messages.Errors.LoginFailed);
@@ -394,7 +394,8 @@ namespace AuthenticationMicroservice.Api.Controllers
             return result.ConvertToDtxResult();
         }
 
-        [PermissionAuthorize(Core.Config.PermissionsConfig.Account.CanRead)]
+        //[PermissionAuthorize(Core.Config.PermissionsConfig.Account.CanRead)]
+        [AllowAnonymous]
         [HttpGet("{id}/refresh-token")]
         [ProducesResponseType(type: typeof(Result<IList<UserListViewModel>>), statusCode: StatusCodes.Status200OK)]
         [ProducesResponseType(type: typeof(Result), statusCode: StatusCodes.Status400BadRequest)]

@@ -8,4 +8,7 @@ Update-Database -context AuthenticationMicroservice.Persistence.DatabaseContext
 
 OR
 
-PM> Add-Migration mig333 -Project WebAutomationSystem.DataModelLayer
+PM> Add-Migration mig333 -Project AuthenticationMicroservice.Persistence
+PM> Add-Migration mig333 -Project AuthenticationMicroservice.Persistence -context AuthenticationMicroservice.Persistence.DatabaseContext
+
+PM> Add-Migration mig333 -Project AuthenticationMicroservice.Persistence -StartupProject AuthenticationMicroservice.Api -context AuthenticationMicroservice.Persistence.DatabaseContext

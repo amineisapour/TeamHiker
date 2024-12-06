@@ -34,7 +34,7 @@ namespace AuthenticationMicroservice.Domain.Models
 
         private List<RefreshToken> _refreshTokens;
         [System.Text.Json.Serialization.JsonIgnore]
-        public List<RefreshToken> RefreshTokens
+        public virtual List<RefreshToken> RefreshTokens
         {
             get => _loader.Load(this, ref _refreshTokens);
             set => _refreshTokens = value;

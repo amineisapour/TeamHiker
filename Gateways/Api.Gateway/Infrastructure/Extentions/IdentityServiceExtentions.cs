@@ -12,7 +12,8 @@ namespace Api.Gateway.Infrastructure.Extentions
         public static IServiceCollection AddIdentityServices(this IServiceCollection services, IConfiguration config)
         {
             // JWT Authentication
-            var key = Encoding.UTF8.GetBytes(config["MySecretKey"]);
+            //var key = Encoding.UTF8.GetBytes(config["MySecretKey"]);
+            var key = Encoding.UTF8.GetBytes("YourSuperSecretKey123");
 
             services.AddAuthentication(options =>
                 {
