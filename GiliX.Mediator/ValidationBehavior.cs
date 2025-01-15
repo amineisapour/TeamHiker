@@ -1,4 +1,7 @@
-﻿using System.Linq;
+﻿using MediatR;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace GiliX.Mediator
 {
@@ -40,6 +43,11 @@ namespace GiliX.Mediator
             }
 
             return await next();
+        }
+
+        Task<TResponse> IPipelineBehavior<TRequest, TResponse>.Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
+        {
+            throw new System.NotImplementedException();
         }
     }
 }
