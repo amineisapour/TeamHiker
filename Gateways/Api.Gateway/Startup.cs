@@ -30,7 +30,7 @@ namespace Api.Gateway
                 {
                     // Application Setting
                     builder
-                        .WithOrigins("http://localhost:4200/")
+                        .WithOrigins("https://localhost:4500/")
                         .AllowAnyOrigin()
                         .AllowAnyHeader()
                         .AllowAnyMethod();

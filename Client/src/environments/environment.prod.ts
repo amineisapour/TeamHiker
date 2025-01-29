@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  authenticationApiUrl: 'http://localhost:5000/gateway/',
+  authenticationApiUrl: 'https://103.75.198.12:5002/gateway/',
 };

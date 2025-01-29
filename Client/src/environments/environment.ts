@@ -4,7 +4,7 @@
 
 export const environment = {
   production: false,
-  authenticationApiUrl: 'http://localhost:5000/gateway/',
+  authenticationApiUrl: 'https://localhost:5002/gateway/',
 };
 
 /*

@@ -60,7 +60,14 @@
                   "with": "src/environments/environment.prod.ts"
                 }
               ],
-              "outputHashing": "all"
+              "optimization": true,
+              "outputHashing": "all",
+              "sourceMap": false,
+              "namedChunks": false,
+              "aot": true,
+              "extractLicenses": true,
+              "vendorChunk": false,
+              "buildOptimizer": true
             },
             "development": {
               "buildOptimizer": false,
@@ -71,7 +78,7 @@
               "namedChunks": true
             }
           },
-          "defaultConfiguration": "production"
+          "defaultConfiguration": "development"
         },
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
@@ -79,7 +86,8 @@
             "sslKey": "./src/assets/ssl/server.key",
             "sslCert": "./src/assets/ssl/server.crt",
             "ssl": true,
-            "browserTarget": "client:build"
+            "browserTarget": "client:build",
+            "port": 4500
           },
           "configurations": {
             "production": {

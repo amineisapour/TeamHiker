@@ -6,7 +6,7 @@
       "DownstreamHostAndPorts": [
         {
           "Host": "localhost",
-          "Port": 5011
+          "Port": 5012
         }
       ],
       "UpstreamPathTemplate": "/gateway/auth/login",
@@ -18,7 +18,7 @@
       "DownstreamHostAndPorts": [
         {
           "Host": "localhost",
-          "Port": 5011
+          "Port": 5012
         }
       ],
       "UpstreamPathTemplate": "/gateway/auth/register",
@@ -30,7 +30,7 @@
       "DownstreamHostAndPorts": [
         {
           "Host": "localhost",
-          "Port": 5011
+          "Port": 5012
         }
       ],
       "UpstreamPathTemplate": "/gateway/auth/refresh-token",
@@ -42,7 +42,7 @@
       "DownstreamHostAndPorts": [
         {
           "Host": "localhost",
-          "Port": 5011
+          "Port": 5012
         }
       ],
       "UpstreamPathTemplate": "/gateway/auth/revoke-token",
@@ -54,7 +54,7 @@
       "DownstreamHostAndPorts": [
         {
           "Host": "localhost",
-          "Port": 5011
+          "Port": 5012
         }
       ],
       "UpstreamPathTemplate": "/gateway/auth/all-user",
@@ -71,7 +71,7 @@
       "DownstreamHostAndPorts": [
         {
           "Host": "localhost",
-          "Port": 5011
+          "Port": 5012
         }
       ],
       "UpstreamPathTemplate": "/gateway/auth/user/{id}",
@@ -95,7 +95,7 @@
       "DownstreamHostAndPorts": [
         {
           "Host": "localhost",
-          "Port": 5011
+          "Port": 5012
         }
       ],
       "UpstreamPathTemplate": "/gateway/auth/test",
@@ -107,6 +107,6 @@
     }
   ],
   "GlobalConfiguration": {
-    "BaseUrl": "https://localhost:5001"
+    "BaseUrl": "https://localhost:5002"
   }
 }
