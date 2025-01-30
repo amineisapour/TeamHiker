@@ -83,7 +83,7 @@ export class RegisterComponent implements OnInit {
     this.accountService.register(model).subscribe(
       (result: HttpRequestResult<AuthenticateData>) => {
         if (result.isFailed) {
-          this.snackbar.openSnackBar(result.errors, MessageType.Error);
+          this.snackbar.openSnackBar(result.errors, MessageType.Error, 3);
         } else {
           if (result.value != null) {
             let user = new CurrentUser(
@@ -98,7 +98,7 @@ export class RegisterComponent implements OnInit {
 
             window.location.href = this.returnUrl;
           } else {
-            this.snackbar.openSnackBar('problem!', MessageType.Error);
+            this.snackbar.openSnackBar('problem!', MessageType.Error, 3);
           }
         }
       },

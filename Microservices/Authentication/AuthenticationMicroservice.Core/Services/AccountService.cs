@@ -29,7 +29,7 @@ namespace AuthenticationMicroservice.Core.Services
         {
             //_key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config.GetSection("AppSettings")["SecretKey"]));
             //_secretKey = Encoding.UTF8.GetBytes(config["MySecretKey"]);
-            _secretKey = Encoding.UTF8.GetBytes("YourSuperSecretKey123");
+            _secretKey = Encoding.UTF8.GetBytes("this is my custom Secret key for authentication! Your SuperSecret Key is Amin@1334!Team61");
             _key = new SymmetricSecurityKey(_secretKey);
 
             int.TryParse(config.GetSection("AppSettings")["RefreshTokenInDaysTTL"], out _refreshTokenInDaysTTL);

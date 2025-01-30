@@ -7,7 +7,7 @@ namespace AuthenticationMicroservice.Persistence
         public DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options: options)
         {
             // TODO
-            Database.EnsureCreated();
+            //Database.EnsureCreated();
         }
 
         public DbSet<Domain.Models.User> Users { get; set; }
@@ -22,10 +22,10 @@ namespace AuthenticationMicroservice.Persistence
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            //modelBuilder.ApplyConfiguration(new Configs.UserConfig());
-            //modelBuilder.ApplyConfiguration(new Configs.PermissionConfig());
-            //modelBuilder.ApplyConfiguration(new Configs.UserInformationConfig());
-            //modelBuilder.ApplyConfiguration(new Configs.RoleConfig());
+            modelBuilder.ApplyConfiguration(new Configs.UserConfig());
+            modelBuilder.ApplyConfiguration(new Configs.PermissionConfig());
+            modelBuilder.ApplyConfiguration(new Configs.UserInformationConfig());
+            modelBuilder.ApplyConfiguration(new Configs.RoleConfig());
 
             //modelBuilder.Entity<Domain.Models.User>()
             //    .HasOne(m => m.UserInformation)

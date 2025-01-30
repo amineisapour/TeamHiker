@@ -10,28 +10,38 @@ namespace AuthenticationMicroservice.Domain.Models
         {
         }
 
-        private readonly ILazyLoader _loader;
-        public RolePermission(ILazyLoader loader)
-        {
-            _loader = loader;
-        }
+        //private readonly ILazyLoader _loader;
+        //public RolePermission(ILazyLoader loader)
+        //{
+        //    _loader = loader;
+        //}
 
-        //public Role Role { get; set; }
-        private Role _role;
-        [Required]
-        public virtual Role Role
-        {
-            get => _loader.Load(this, ref _role);
-            set => _role = value;
-        }
+        ////public Role Role { get; set; }
+        //private Role _role;
+        //[Required]
+        //public virtual Role Role
+        //{
+        //    get => _loader.Load(this, ref _role);
+        //    set => _role = value;
+        //}
 
-        //public Permission Permission { get; set; }
-        private Permission _permission;
+        ////public Permission Permission { get; set; }
+        //private Permission _permission;
+        //[Required]
+        //public virtual Permission Permission
+        //{
+        //    get => _loader.Load(this, ref _permission);
+        //    set => _permission = value;
+        //}
+
         [Required]
-        public virtual Permission Permission
-        {
-            get => _loader.Load(this, ref _permission);
-            set => _permission = value;
-        }
+        public System.Guid RoleId { get; set; }
+
+        public virtual Role Role { get; set; }
+
+        [Required]
+        public System.Guid PermissionId { get; set; }
+
+        public virtual Permission Permission { get; set; }
     }
 }

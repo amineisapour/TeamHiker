@@ -4,6 +4,7 @@ using AuthenticationMicroservice.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AuthenticationMicroservice.Persistence.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20250129142117_mig01-29")]
+    partial class mig0129
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -32,14 +35,11 @@ namespace AuthenticationMicroservice.Persistence.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<bool>("IsActive")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(true);
+                        .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(254)
-                        .IsUnicode(true)
                         .HasColumnType("nvarchar(254)");
 
                     b.Property<DateTime>("RegisterDateTime")
@@ -47,7 +47,7 @@ namespace AuthenticationMicroservice.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Permissions", (string)null);
+                    b.ToTable("Permissions");
                 });
 
             modelBuilder.Entity("AuthenticationMicroservice.Domain.Models.RefreshToken", b =>
@@ -97,14 +97,11 @@ namespace AuthenticationMicroservice.Persistence.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<bool>("IsActive")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(true);
+                        .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(254)
-                        .IsUnicode(true)
                         .HasColumnType("nvarchar(254)");
 
                     b.Property<DateTime>("RegisterDateTime")
@@ -112,7 +109,7 @@ namespace AuthenticationMicroservice.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Roles", (string)null);
+                    b.ToTable("Roles");
                 });
 
             modelBuilder.Entity("AuthenticationMicroservice.Domain.Models.RolePermission", b =>
@@ -149,9 +146,7 @@ namespace AuthenticationMicroservice.Persistence.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<bool>("IsActive")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(true);
+                        .HasColumnType("bit");
 
                     b.Property<byte[]>("PasswordHash")
                         .IsRequired()
@@ -167,12 +162,11 @@ namespace AuthenticationMicroservice.Persistence.Migrations
                     b.Property<string>("Username")
                         .IsRequired()
                         .HasMaxLength(254)
-                        .IsUnicode(true)
                         .HasColumnType("nvarchar(254)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("AuthenticationMicroservice.Domain.Models.UserInformation", b =>
@@ -207,9 +201,7 @@ namespace AuthenticationMicroservice.Persistence.Migrations
                         .HasColumnType("int");
 
                     b.Property<bool>("IsActive")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(true);
+                        .HasColumnType("bit");
 
                     b.Property<string>("Language")
                         .IsRequired()
@@ -238,10 +230,9 @@ namespace AuthenticationMicroservice.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId")
-                        .IsUnique();
+                    b.HasIndex("UserId");
 
-                    b.ToTable("UserInformation", (string)null);
+                    b.ToTable("UserInformations");
                 });
 
             modelBuilder.Entity("AuthenticationMicroservice.Domain.Models.UserPermission", b =>
@@ -329,8 +320,8 @@ namespace AuthenticationMicroservice.Persistence.Migrations
             modelBuilder.Entity("AuthenticationMicroservice.Domain.Models.UserInformation", b =>
                 {
                     b.HasOne("AuthenticationMicroservice.Domain.Models.User", "User")
-                        .WithOne()
-                        .HasForeignKey("AuthenticationMicroservice.Domain.Models.UserInformation", "UserId")
+                        .WithMany()
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

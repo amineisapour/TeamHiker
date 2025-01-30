@@ -27,6 +27,7 @@ namespace AuthenticationMicroservice.Domain.Models
         public bool IsRevoked => Revoked != null;
         public bool IsActive => !IsRevoked && !IsExpired;
 
+        public System.Guid UserId { get; set; }
         public virtual User User { get; set; }
     }
 }

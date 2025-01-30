@@ -88,7 +88,7 @@ export class LoginComponent implements OnInit {
           // result.errors.forEach(function (item, index) {
           //   console.log(item);
           // });
-          this.snackbar.openSnackBar(result.errors, MessageType.Error);
+          this.snackbar.openSnackBar(result.errors, MessageType.Error, 3);
         } else {
           if (result.value != null) {
             let user = new CurrentUser(
@@ -104,7 +104,7 @@ export class LoginComponent implements OnInit {
             window.location.href = this.returnUrl;
           } else {
             //console.log('problem!');
-            this.snackbar.openSnackBar('problem!', MessageType.Error);
+            this.snackbar.openSnackBar('problem!', MessageType.Error, 3);
           }
         }
       },

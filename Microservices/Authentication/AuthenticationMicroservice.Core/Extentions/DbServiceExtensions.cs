@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.Data.SqlClient;
+﻿using AuthenticationMicroservice.SimplePersistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -8,65 +7,71 @@ namespace AuthenticationMicroservice.Core.Extentions
 {
     public static class DbServiceExtensions
     {
-
         public static IServiceCollection AddDbServices(this IServiceCollection services, IConfiguration configuration)
         {
-            //services.AddDbContext<DataContext>(options =>
+            services.AddDbContext<ApplicationDbContext>(options =>
+            {
+                var connectionString = configuration.GetConnectionString("DefaultConnection");
+                options
+                    .UseLazyLoadingProxies()
+                    .UseSqlServer(connectionString);
+            });
+
+            #region Repository
+
+            //string databaseConnectionString =
+            //    configuration
+            //        .GetSection(key: "ConnectionStrings")
+            //        .GetSection(key: "QueriesConnectionString")
+            //        .Value;
+
+            //string databaseProviderString =
+            //    configuration
+            //        .GetSection(key: "QueriesDatabaseProvider")
+            //        .Value;
+
+            //services.AddDbContext<Persistence.DatabaseContext>(options =>
             //{
-            //    options.UseSqlite(config.GetConnectionString("DefaultConnection"));
+            //    //options.UseSqlServer(Configuration.GetConnectionString("eShop"));
+            //    SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(databaseConnectionString);
+
+            //    //builder.Password = config["DBPassword"];
+            //    options.UseLazyLoadingProxies().UseSqlServer(builder.ConnectionString);
             //});
 
-            string databaseConnectionString =
-                configuration
-                    .GetSection(key: "ConnectionStrings")
-                    .GetSection(key: "QueriesConnectionString")
-                    .Value;
+            //services.AddTransient<Persistence.IUnitOfWork, Persistence.UnitOfWork>(current =>
+            //{
+            //    GiliX.Persistence.Enums.Provider databaseProvider =
+            //        (GiliX.Persistence.Enums.Provider)
+            //        System.Convert.ToInt32(databaseProviderString);
 
-            string databaseProviderString =
-                configuration
-                    .GetSection(key: "QueriesDatabaseProvider")
-                    .Value;
+            //    GiliX.Persistence.Options options =
+            //        new GiliX.Persistence.Options
+            //        {
+            //            Provider = databaseProvider,
+            //            ConnectionString = databaseConnectionString,
+            //        };
 
-            services.AddDbContext<Persistence.DatabaseContext>(options =>
-            {
-                //options.UseSqlServer(Configuration.GetConnectionString("eShop"));
-                SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(databaseConnectionString);
+            //    return new Persistence.UnitOfWork(options: options);
+            //});
 
-                //builder.Password = config["DBPassword"];
-                options.UseLazyLoadingProxies().UseSqlServer(builder.ConnectionString);
-            });
+            //services.AddTransient<Persistence.IQueryUnitOfWork, Persistence.QueryUnitOfWork>(current =>
+            //{
+            //    GiliX.Persistence.Enums.Provider databaseProvider =
+            //        (GiliX.Persistence.Enums.Provider)
+            //        System.Convert.ToInt32(databaseProviderString);
 
-            services.AddTransient<Persistence.IUnitOfWork, Persistence.UnitOfWork>(current =>
-            {
-                GiliX.Persistence.Enums.Provider databaseProvider =
-                    (GiliX.Persistence.Enums.Provider)
-                    System.Convert.ToInt32(databaseProviderString);
+            //    GiliX.Persistence.Options options =
+            //        new GiliX.Persistence.Options
+            //        {
+            //            Provider = databaseProvider,
+            //            ConnectionString = databaseConnectionString,
+            //        };
 
-                GiliX.Persistence.Options options =
-                    new GiliX.Persistence.Options
-                    {
-                        Provider = databaseProvider,
-                        ConnectionString = databaseConnectionString,
-                    };
+            //    return new Persistence.QueryUnitOfWork(options: options);
+            //});
 
-                return new Persistence.UnitOfWork(options: options);
-            });
-
-            services.AddTransient<Persistence.IQueryUnitOfWork, Persistence.QueryUnitOfWork>(current =>
-            {
-                GiliX.Persistence.Enums.Provider databaseProvider =
-                    (GiliX.Persistence.Enums.Provider)
-                    System.Convert.ToInt32(databaseProviderString);
-
-                GiliX.Persistence.Options options =
-                    new GiliX.Persistence.Options
-                    {
-                        Provider = databaseProvider,
-                        ConnectionString = databaseConnectionString,
-                    };
-
-                return new Persistence.QueryUnitOfWork(options: options);
-            });
+            #endregion
 
             return services;
         }

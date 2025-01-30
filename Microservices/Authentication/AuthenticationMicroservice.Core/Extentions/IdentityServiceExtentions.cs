@@ -13,7 +13,7 @@ namespace AuthenticationMicroservice.Core.Extentions
         {
             // JWT Authentication
             //var key = Encoding.UTF8.GetBytes(config["MySecretKey"]);
-            var key = Encoding.UTF8.GetBytes("YourSuperSecretKey123");
+            var key = Encoding.UTF8.GetBytes("this is my custom Secret key for authentication! Your SuperSecret Key is Amin@1334!Team61");
 
             services.AddAuthentication(options =>
                 {

@@ -17,7 +17,7 @@ namespace AuthenticationMicroservice.Persistence.Configs
             builder.Property(m => m.FirstName).IsRequired();
             builder.Property(m => m.LastName).IsRequired();
             builder.Property(m => m.Birthdate).IsRequired();
-            //builder.Property(m => m.UserId).IsRequired();
+            builder.Property(m => m.UserId).IsRequired();
             builder.HasOne(m => m.User).WithOne().IsRequired();
 
 

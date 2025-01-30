@@ -9,28 +9,38 @@ namespace AuthenticationMicroservice.Domain.Models
         {
         }
 
-        private readonly ILazyLoader _loader;
-        public UserRole(ILazyLoader loader)
-        {
-            _loader = loader;
-        }
+        //private readonly ILazyLoader _loader;
+        //public UserRole(ILazyLoader loader)
+        //{
+        //    _loader = loader;
+        //}
 
-        //public User User { get; set; }
-        private User _user;
-        [Required]
-        public virtual User User
-        {
-            get => _loader.Load(this, ref _user);
-            set => _user = value;
-        }
+        ////public User User { get; set; }
+        //private User _user;
+        //[Required]
+        //public virtual User User
+        //{
+        //    get => _loader.Load(this, ref _user);
+        //    set => _user = value;
+        //}
 
-        //public Role Role { get; set; }
-        private Role _role;
+        ////public Role Role { get; set; }
+        //private Role _role;
+        //[Required]
+        //public virtual Role Role
+        //{
+        //    get => _loader.Load(this, ref _role);
+        //    set => _role = value;
+        //}
+
         [Required]
-        public virtual Role Role
-        {
-            get => _loader.Load(this, ref _role);
-            set => _role = value;
-        }
+        public System.Guid UserId { get; set; }
+
+        public virtual User User { get; set; }
+
+        [Required]
+        public System.Guid RoleId { get; set; }
+
+        public virtual Role Role { get; set; }
     }
 }

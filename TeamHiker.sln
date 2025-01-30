@@ -108,6 +108,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CrawlerConsole", "UI\Crawle
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestCrawler", "Test\TestCrawler\TestCrawler.csproj", "{208DF052-EE30-4D97-B4D1-02F3AB7BD9DD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AuthenticationMicroservice.SimplePersistence", "Microservices\Authentication\AuthenticationMicroservice.SimplePersistence\AuthenticationMicroservice.SimplePersistence.csproj", "{471000AA-4D15-402E-AA19-75073748F487}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -181,6 +183,10 @@ Global
 		{208DF052-EE30-4D97-B4D1-02F3AB7BD9DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{208DF052-EE30-4D97-B4D1-02F3AB7BD9DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{208DF052-EE30-4D97-B4D1-02F3AB7BD9DD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{471000AA-4D15-402E-AA19-75073748F487}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{471000AA-4D15-402E-AA19-75073748F487}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{471000AA-4D15-402E-AA19-75073748F487}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{471000AA-4D15-402E-AA19-75073748F487}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -213,6 +219,7 @@ Global
 		{E24D4312-4D62-4916-8862-F9C8DD70AD21} = {8FDC2776-6650-4705-B7A8-A63EADDE98C8}
 		{D561A468-360E-4A50-9B8D-CEA99F6DCCA2} = {2FB7A510-0D82-4A81-A402-1846F9C212C0}
 		{208DF052-EE30-4D97-B4D1-02F3AB7BD9DD} = {8FDC2776-6650-4705-B7A8-A63EADDE98C8}
+		{471000AA-4D15-402E-AA19-75073748F487} = {8AFE056E-BF18-4128-88B7-8D5B2DF9A89F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {60FB1A65-CAB4-49A4-BC0A-0EC49FA7EE7F}
