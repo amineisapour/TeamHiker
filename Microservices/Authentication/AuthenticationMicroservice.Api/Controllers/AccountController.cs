@@ -299,8 +299,8 @@ namespace AuthenticationMicroservice.Api.Controllers
 
         [AllowAnonymous]
         [HttpPost("register")]
-        //[ProducesResponseType(type: typeof(Result<AuthenticateResponse>), statusCode: StatusCodes.Status200OK)]
-        //[ProducesResponseType(type: typeof(Result), statusCode: StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(type: typeof(Result<AuthenticateResponse>), statusCode: StatusCodes.Status200OK)]
+        [ProducesResponseType(type: typeof(Result), statusCode: StatusCodes.Status400BadRequest)]
         public async Task<Result<AuthenticateResponse>> Register([FromBody] RegisterUserViewModel registerUser)
         {
             var result = new FluentResults.Result<AuthenticateResponse>();
@@ -339,8 +339,8 @@ namespace AuthenticationMicroservice.Api.Controllers
                     FirstName = registerUser.FirstName,
                     LastName = registerUser.LastName,
                     Gender = registerUser.Gender,
-                    NationalId = registerUser.NationalId,
-                    User = newUser
+                    User = newUser,
+                    Email = registerUser.Email,
                 };
                 //await UnitOfWork.UserInformations.InsertAsync(newUserInfo);
                 //await UnitOfWork.SaveAsync();
@@ -474,16 +474,22 @@ namespace AuthenticationMicroservice.Api.Controllers
         }
 
         [PermissionAuthorize(Core.Config.PermissionsConfig.Account.CanRead)]
+        //[AllowAnonymous]
         [HttpGet("get-user/{id}")]
-        //[ProducesResponseType(type: typeof(Result<UserListViewModel>), statusCode: StatusCodes.Status200OK)]
-        //[ProducesResponseType(type: typeof(Result), statusCode: StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(type: typeof(Result<UserListViewModel>), statusCode: StatusCodes.Status200OK)]
+        [ProducesResponseType(type: typeof(Result), statusCode: StatusCodes.Status400BadRequest)]
         public async Task<Result<UserListViewModel>> GetById(Guid id)
         {
             var result = new FluentResults.Result<UserListViewModel>();
             try
             {
                 //var user = await QueryUnitOfWork.Users.GetUserByUserIdAsync(id);
-                var user = await DbContext.Users.SingleOrDefaultAsync(u => u.Id == id);
+                var user = await DbContext.Users.FirstOrDefaultAsync(u => u.Id == id);
+                if (user == null)
+                {
+                    result.WithError(errorMessage: "User Not Found!");
+                    return result.ConvertToDtxResult();
+                }
                 //var userInfo = await QueryUnitOfWork.UserInformations.GetUserInfoByUserIdAsync(user.Id);
                 var userInfo = await DbContext.UserInformations.SingleOrDefaultAsync(u => u.UserId == user.Id);
 

@@ -41,13 +41,13 @@ namespace AuthenticationMicroservice.Domain.Models
         [Required]
         public System.DateTime Birthdate { get; set; }
 
-        [Required]
+        [AllowNull]
         public string Bio { get; set; }
 
         [Required]
         public string Email { get; set; }
 
-        [Required]
+        [AllowNull]
         public string Phone { get; set; }
 
         [AllowNull]
@@ -59,7 +59,7 @@ namespace AuthenticationMicroservice.Domain.Models
         [AllowNull]
         public string Certifications { get; set; }
 
-        [Required]
+        [AllowNull]
         public string Language { get; set; }
 
         [Required]

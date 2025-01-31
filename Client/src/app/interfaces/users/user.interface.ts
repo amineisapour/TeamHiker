@@ -8,4 +8,11 @@ export interface User {
     nationalId: string;
     gender: number;
     birthdate: string;
+    bio: string,
+    certifications: string,
+    email: string,
+    equipment: string,
+    language: string,
+    phone: string,
+    socialMediaLinks: string
 }

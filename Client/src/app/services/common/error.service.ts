@@ -19,8 +19,10 @@ export class ErrorService implements ErrorHandler {
     else {
       //console.log(error.message);
       //console.error("An error occurred here!");
-      console.error(router.url);
-      console.error(error);
+      // console.error(router.url);
+      // console.error(error);
+      console.log(router.url);
+      console.log(error);
     }
     //router.navigate(['/error']);
   }

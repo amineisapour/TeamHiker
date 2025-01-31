@@ -20,13 +20,16 @@ namespace AuthenticationMicroservice.Domain.ViewModels
         [MaxLength(50)]
         public string LastName { get; set; }
 
-        [AllowNull]
-        public string NationalId { get; set; }
+        //[AllowNull]
+        //public string NationalId { get; set; }
 
         [Required]
         public Enums.Gender Gender { get; set; }
 
         [Required]
         public System.DateTime Birthdate { get; set; }
+
+        [Required]
+        public string Email { get; set; }
     }
 }

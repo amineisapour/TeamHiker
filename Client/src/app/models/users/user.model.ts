@@ -11,6 +11,13 @@ export class User implements Interfaces.User {
         public birthdate: string,
         public nationalId: string,
         public registerDateTime: string,
-        public isActive: boolean
+        public isActive: boolean,
+        public bio: string,
+        public certifications: string,
+        public email: string,
+        public equipment: string,
+        public language: string,
+        public phone: string,
+        public socialMediaLinks: string
     ) { }
 }

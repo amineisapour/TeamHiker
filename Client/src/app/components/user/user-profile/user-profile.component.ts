@@ -7,6 +7,12 @@ import { AppDateAdapter, AppDateTime, APP_DATE_FORMATS } from 'src/app/infrastru
 import { ValidationService } from 'src/app/services/common/validation.service';
 import {COMMA, ENTER} from '@angular/cdk/keycodes';
 import {MatChipInputEvent} from '@angular/material/chips';
+import { HttpRequestResult } from 'src/app/models/http-request-result.model';
+import { User } from 'src/app/models/users/user.model';
+import { HttpErrorResponse } from '@angular/common/http';
+import { ErrorHandleHelper } from 'src/app/infrastructure/helpers/error-handle.helper';
+import { SnackbarComponent } from '../../common/snackbar/snackbar.component';
+import { DateAdapter, MAT_DATE_FORMATS } from '@angular/material/core';
 
 export interface CertificationList {
   name: string;
@@ -19,16 +25,29 @@ export interface SocialMediaList {
 @Component({
   selector: 'app-user-profile',
   templateUrl: './user-profile.component.html',
-  styleUrls: ['./user-profile.component.scss']
+  styleUrls: ['./user-profile.component.scss'],
+    providers: [
+      { provide: DateAdapter, useClass: AppDateAdapter },
+      { provide: MAT_DATE_FORMATS, useValue: APP_DATE_FORMATS }
+    ]
 })
 export class UserProfileComponent implements OnInit {
 
   public currentUser: CurrentUser;
   public registerForm: FormGroup;
   
-  userGender = Gender;
+  //userGender = Gender;
+  // userGender = {
+  //   Woman: Gender.Woman,
+  //   Man: Gender.Man
+  // };
+  userGender = [
+    { key: 'Woman', value: 0 },
+    { key: 'Man', value: 1 }
+  ];
+  public selectedId: number;
 
-  languageList: string[] = ['English', 'Chinese', 'Hindi', 'Spanish', 'French', 'Arabic', 'Bengali', 'Portuguese', 'Russian', 'German', 'Japanese', 'Turkish', 'Persian (Farsi, Dari, Tajik)', 'Indonesian'];
+  languageList: string[] = ['English', 'Chinese', 'Hindi', 'Spanish', 'French', 'Arabic', 'Bengali', 'Portuguese', 'Russian', 'German', 'Japanese', 'Turkish', 'Persian', 'Indonesian'];
 
   readonly separatorKeysCodes = [ENTER, COMMA] as const;
 
@@ -37,11 +56,7 @@ export class UserProfileComponent implements OnInit {
   removable = true;
   addOnBlur = true;
 
-  certificationList: CertificationList[] = [
-    // {name: 'Lemon'},
-    // {name: 'Lime'},
-    // {name: 'Apple'},
-  ];
+  certificationList: CertificationList[] = [];
 
   add(event: MatChipInputEvent): void {
     const value = (event.value || '').trim();
@@ -69,11 +84,7 @@ export class UserProfileComponent implements OnInit {
   removable_socialMedia = true;
   addOnBlur_socialMedia = true;
 
-  socialMediaList: SocialMediaList[] = [
-    // {name: 'Lemon'},
-    // {name: 'Lime'},
-    // {name: 'Apple'},
-  ];
+  socialMediaList: SocialMediaList[] = [];
 
   add_socialMediaLinks(event: MatChipInputEvent): void {
     const value = (event.value || '').trim();
@@ -99,37 +110,34 @@ export class UserProfileComponent implements OnInit {
   constructor(
     private accountService: AccountService,
     private formBuilder: FormBuilder,
+    public snackbar: SnackbarComponent
   ) {
-    this.currentUser = this.accountService.getCurrentUser();
-    this.registerForm = this.formBuilder.group({
-      gender: ['', [Validators.required]],
-      firstName: ['', [Validators.required, Validators.maxLength(50)]],
-      lastName: ['', [Validators.required, Validators.maxLength(50)]],
-      bio: ['',[Validators.required]],
-      language: ['', [Validators.required]],
-      certification: ['', []],
-      email: ['', [Validators.required, ValidationService.emailValidator]],
-      phone: ['', [Validators.required]],
-      socialMediaLinks: ['', []],
-      equipment: ['', []],
-    });
+   
   }
 
-   register(data: any): void {
-       const model = {
-         "Username": data.username,
-         "Password": data.password,
-         "FirstName": data.firstName,
-         "LastName": data.lastName,
-         "NationalId": data.nationalId,
-         "Gender": (data.gender == Gender.Man) ? 1 : 0,
-         "Birthdate": AppDateTime.getFormatDateTime(data.birthdate, DateTimeFormat.YyyyMmDd)
-       };
-       this.accountService.register(model).subscribe(
-       );
-     }
+  register(data: any): void {
+    //console.log(data);
+    //console.log(this.socialMediaList);
+    //console.log(this.certificationList);
+    const model = {
+      "FirstName": data.firstName,
+      "LastName": data.lastName,
+      "Gender": data.gender,
+      "Birthdate": AppDateTime.getFormatDateTime(data.birthdate, DateTimeFormat.YyyyMmDd),
+      "Bio": data.bio,
+      "Email": data.email,
+      "Phone": data.phone,
+      "Equipment": data.equipment,
+      "SocialMediaLinks": this.socialMediaList.map(item => item.name).join(', '),
+      "Certifications": this.certificationList.map(item => item.name).join(', '),
+      "Language": data.language.join(', ')
+    };
 
-  ngOnInit(): void { }
+    console.table(model);
+    console.log(model);
+  //  this.accountService.register(model).subscribe(
+  //  );
+  }
 
   getErrorMessage(element: string): string {
     return this.registerForm.controls[element].hasError('required') ? 'The ' + element + ' is required!' :
@@ -139,4 +147,60 @@ export class UserProfileComponent implements OnInit {
             this.registerForm.controls[element].hasError('pattern') ? 'Passwords do not match' :
               '';
   }
+
+  ngOnInit(): void { 
+    this.currentUser = this.accountService.getCurrentUser();
+
+    let id = this.currentUser.id;
+    
+    this.accountService.getUser(id).subscribe(
+      (result: HttpRequestResult<User>) => {
+        if (result.isFailed) {
+          this.snackbar.openSnackBar(result.errors, MessageType.Error);
+        }
+        else {
+          if (result.value != null) {
+            let user = result.value;
+
+            // console.table(user);
+            // console.log(user);
+
+            this.selectedId = user.gender;
+            //let ln = 'Hindi, Spanish, Persian';
+            let languageArray = (user.language != null) ?
+                                user.language.split(',').map(lang => lang.trim())  :
+                                [];
+            let mediaList = 'https://www.linkedin.com/in/amin-eisapour/, https://x.com/AminEisapour, https://www.instagram.com/amin_eisapour/';
+            this.socialMediaList = (user.socialMediaLinks != null) ?
+                                    user.socialMediaLinks.split(',').map(media => ({ name: media.trim() })) :
+                                    [];
+            this.certificationList = (user.certifications != null) ?
+                                      user.certifications.split(',').map(cert => ({ name: cert.trim() })) :
+                                      [];
+
+            this.registerForm = this.formBuilder.group({
+              gender: [user.gender, [Validators.required]],
+              firstName: [user.firstName, [Validators.required, Validators.maxLength(50)]],
+              lastName: [user.lastName, [Validators.required, Validators.maxLength(50)]],
+              birthdate: [user.birthdate, [Validators.required]],
+              bio: [user.bio,[Validators.required]],
+              language: [languageArray, [Validators.required]],
+              certification: [user.certifications, []],
+              email: [user.email, [Validators.required, ValidationService.emailValidator]],
+              phone: [user.phone, [Validators.required]],
+              socialMediaLinks: [user.socialMediaLinks, []],
+              equipment: [user.equipment, []],
+            });
+          } else {
+              //console.log('problem!');
+              this.snackbar.openSnackBar('problem!', MessageType.Error);
+           }
+        }
+      },
+      (error: HttpErrorResponse) => {
+        return ErrorHandleHelper.handleError(error, this.snackbar);
+      }
+    );
+   }
+
 }

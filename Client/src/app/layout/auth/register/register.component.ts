@@ -78,7 +78,8 @@ export class RegisterComponent implements OnInit {
       "LastName": data.lastName,
       //"NationalId": data.nationalId,
       "Gender": (data.gender == Gender.Man) ? 1 : 0,
-      "Birthdate": AppDateTime.getFormatDateTime(data.birthdate, DateTimeFormat.YyyyMmDd)
+      "Birthdate": AppDateTime.getFormatDateTime(data.birthdate, DateTimeFormat.YyyyMmDd),
+      "Email": data.username,
     };
     this.accountService.register(model).subscribe(
       (result: HttpRequestResult<AuthenticateData>) => {

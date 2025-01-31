@@ -83,6 +83,20 @@ export class AccountService {
             );
     }
 
+    public getUser(id: string): Observable<HttpRequestResult<User>> {
+        const requestUrl: string = this.baseAuthenticationUrl + 'auth/user/' + id;
+
+        return this.http.get<HttpRequestResult<User>>(requestUrl, this.httpOptions)
+            .pipe(
+                map(result => {
+                    return result;
+                }),
+                catchError(e => {
+                    return throwError(e)
+                })
+            );
+    }
+
     public getCurrentUser(): CurrentUser {
         return this.localStorageService.loadInfo('current-user') as CurrentUser;
     }

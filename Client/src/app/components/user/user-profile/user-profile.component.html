@@ -4,9 +4,9 @@
 <form [formGroup]="registerForm" (ngSubmit)="register(registerForm.value)" class="example-form">
     <mat-form-field appearance="standard" class="example-full-width">
         <mat-label>Gender</mat-label>
-        <mat-select formControlName="gender" required>
-          <mat-option>Select an option</mat-option>
-          <mat-option *ngFor="let gen of userGender | keyvalue" [value]="gen.value">{{ gen.key }}</mat-option>
+        <mat-select formControlName="gender" [(ngModel)]="selectedId" required>
+          <mat-option [value]="">Select an option</mat-option>
+          <mat-option *ngFor="let gen of userGender" [value]="gen.value">{{ gen.key }}</mat-option>
         </mat-select>
 
         <!-- <mat-error *ngIf="registerForm.controls['gender'].hasError('required')">
@@ -34,6 +34,17 @@
     </mat-form-field>
     <br>
     <mat-form-field appearance="standard" class="example-full-width">
+        <mat-label>BirthDate</mat-label>
+        <!-- <input matInput formControlName="birthdate" type="date" date required> -->
+        <input matInput formControlName="birthdate" [matDatepicker]="picker" (click)="picker.open()">
+        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker  #picker></mat-datepicker>
+        <mat-error *ngIf="!registerForm.controls['birthdate'].valid && registerForm.controls['birthdate'].touched">
+            {{getErrorMessage('birthdate')}}
+        </mat-error>
+      </mat-form-field>
+    <br>
+    <mat-form-field appearance="standard" class="example-full-width">
         <mat-label>Bio/Description</mat-label>
         <textarea matInput formControlName="bio" autocomplete="off" required rows="7"></textarea>
         <mat-error *ngIf="!registerForm.controls['bio'].valid && registerForm.controls['bio'].touched">
@@ -54,14 +65,14 @@
     <mat-form-field appearance="standard" class="example-full-width">
         <mat-label>Certifications</mat-label>
         <mat-chip-list #certification aria-label="Certification selection">
-            <mat-chip formControlName="certification" *ngFor="let certification of certificationList" [selectable]="selectable"
+            <mat-chip *ngFor="let certification of certificationList" [selectable]="selectable"
                      [removable]="removable" (removed)="remove(certification)">
               {{certification.name}}
               <button matChipRemove *ngIf="removable" style="color: red; padding-right: 15px; font-weight: bold;">
                 X
               </button>
             </mat-chip>
-            <input 
+            <input formControlName="certification"
                    placeholder="New Certification..."
                    [matChipInputFor]="certification"
                    [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
@@ -89,14 +100,14 @@
     <mat-form-field appearance="standard" class="example-full-width">
         <mat-label>Social Media Links</mat-label>
         <mat-chip-list #socialMediaLinks aria-label="SocialMedia selection">
-            <mat-chip formControlName="socialMediaLinks" *ngFor="let socialMedia of socialMediaList" [selectable]="selectable_socialMedia"
+            <mat-chip *ngFor="let socialMedia of socialMediaList" [selectable]="selectable_socialMedia"
                      [removable]="removable_socialMedia" (removed)="remove_socialMediaLinks(socialMedia)">
               {{socialMedia.name}}
               <button matChipRemove *ngIf="removable_socialMedia" style="color: red; padding-right: 15px; font-weight: bold;">
                 X
               </button>
             </mat-chip>
-            <input 
+            <input formControlName="socialMediaLinks"
                    placeholder="New Social Media Links..."
                    [matChipInputFor]="socialMediaLinks"
                    [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
@@ -112,8 +123,7 @@
             {{getErrorMessage('equipment')}}
         </mat-error>
     </mat-form-field>
-</form>
-<br>
+    <br>
 <br>
 <br>
 <p style="text-align: center;">
@@ -122,6 +132,7 @@
 </p>
 <br>
 <br>
+</form>
             
 
 <!-- <div style="bottom:0;">
