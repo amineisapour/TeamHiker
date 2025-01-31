@@ -17,16 +17,16 @@ namespace AuthenticationMicroservice.Core
 
         public static void ConfigureServices(IConfiguration configuration, IServiceCollection services)
         {
-            services.AddControllers()
-                .ConfigureApiBehaviorOptions(options =>
-                {
-                    options.SuppressConsumesConstraintForFormFileParameters = true;
-                    options.SuppressInferBindingSourcesForParameters = true;
-                    options.SuppressModelStateInvalidFilter = true;
-                    options.SuppressMapClientErrors = true;
-                    options.ClientErrorMapping[StatusCodes.Status404NotFound].Link =
-                        "https://httpstatuses.com/404";
-                });
+            //services.AddControllers()
+            //    .ConfigureApiBehaviorOptions(options =>
+            //    {
+            //        options.SuppressConsumesConstraintForFormFileParameters = true;
+            //        options.SuppressInferBindingSourcesForParameters = true;
+            //        options.SuppressModelStateInvalidFilter = true;
+            //        options.SuppressMapClientErrors = true;
+            //        options.ClientErrorMapping[StatusCodes.Status404NotFound].Link =
+            //            "https://httpstatuses.com/404";
+            //    });
 
             services.AddApplicationServices(configuration);
 
@@ -34,7 +34,7 @@ namespace AuthenticationMicroservice.Core
 
             services.AddIdentityServices(configuration);
 
-            services.AddOurSwaager();
+            //services.AddOurSwaager();
 
             services.AddControllers();
         }
@@ -67,8 +67,8 @@ namespace AuthenticationMicroservice.Core
                 endpoints.MapControllers();
             });
 
-            app.UseSwagger();
-            app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "AuthenticationMicroservice.Api v1"));
+            //app.UseSwagger();
+            //app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "AuthenticationMicroservice.Api v1"));
         }
     }
 }

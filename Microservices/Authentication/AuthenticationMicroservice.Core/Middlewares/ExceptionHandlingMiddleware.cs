@@ -20,42 +20,42 @@ namespace AuthenticationMicroservice.Core.Middlewares
 
         public async System.Threading.Tasks.Task InvokeAsync(HttpContext context)
         {
-            var next = Next(context);
-            await next;
+            //var next = Next(context);
+            //await next;
 
-            //try
-            //{
-            //    //var token = context.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
-            //    //var userId = accountService.ValidateJwtToken(token);
-            //    //if (userId != null)
-            //    //{
-            //    //    // attach user to context on successful jwt validation
-            //    //    context.Items["User"] = await QueryUnitOfWork.Users.GetUserByUserIdAsync(userId.Value);
-            //    //}
+            try
+            {
+                //var token = context.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+                //var userId = accountService.ValidateJwtToken(token);
+                //if (userId != null)
+                //{
+                //    // attach user to context on successful jwt validation
+                //    context.Items["User"] = await QueryUnitOfWork.Users.GetUserByUserIdAsync(userId.Value);
+                //}
 
-            //    var next = Next(context);
+                var next = Next(context);
 
-            //    switch (context.Response.StatusCode)
-            //    {
-            //        case (int)HttpStatusCode.NotFound:
-            //            throw new KeyNotFoundException();
-            //        case (int)HttpStatusCode.Unauthorized:
-            //            throw new UnauthorizedAccessException();
-            //        case (int)HttpStatusCode.Forbidden:
-            //            throw new Exceptions.ForbiddenException("Attempted to perform a forbidden operation.");
-            //        case (int)HttpStatusCode.RequestTimeout:
-            //            throw new TimeoutException();
-            //        case (int)HttpStatusCode.UnsupportedMediaType:
-            //            throw new UnsupportedContentTypeException("model binder for the body of the request is unable to understand the request content-type header!");
-            //        case (int)HttpStatusCode.BadRequest:
-            //            throw new BadHttpRequestException("Bad Request");
-            //    }
-            //    await next;
-            //}
-            //catch (Exception ex)
-            //{
-            //    await HandleExceptionAsync(context, ex);
-            //}
+                switch (context.Response.StatusCode)
+                {
+                    case (int)HttpStatusCode.NotFound:
+                        throw new KeyNotFoundException();
+                    case (int)HttpStatusCode.Unauthorized:
+                        throw new UnauthorizedAccessException();
+                    case (int)HttpStatusCode.Forbidden:
+                        throw new Exceptions.ForbiddenException("Attempted to perform a forbidden operation.");
+                    case (int)HttpStatusCode.RequestTimeout:
+                        throw new TimeoutException();
+                    case (int)HttpStatusCode.UnsupportedMediaType:
+                        throw new UnsupportedContentTypeException("model binder for the body of the request is unable to understand the request content-type header!");
+                    case (int)HttpStatusCode.BadRequest:
+                        throw new BadHttpRequestException("Bad Request");
+                }
+                await next;
+            }
+            catch (Exception ex)
+            {
+                await HandleExceptionAsync(context, ex);
+            }
         }
 
         private static System.Threading.Tasks.Task HandleExceptionAsync(HttpContext context, Exception exception)

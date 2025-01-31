@@ -1,6 +1,7 @@
 ﻿using AuthenticationMicroservice.Domain.Models;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection.Emit;
 
 namespace AuthenticationMicroservice.SimplePersistence.Configurations
 {

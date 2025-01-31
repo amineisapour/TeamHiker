@@ -13,7 +13,13 @@ namespace AuthenticationMicroservice.SimplePersistence.Configurations
                 .IsUnique(unique: true)
                 ;
 
-            builder.HasOne(m => m.UserInformations).WithOne().IsRequired();
+            //builder.HasOne(m => m.UserInformations).WithOne().IsRequired();
+
+            builder
+                .HasOne(u => u.UserInformation)        // A User has one UserInformation
+                .WithOne(ui => ui.User)                // A UserInformation has one User
+                .HasForeignKey<UserInformation>(ui => ui.UserId)  // UserId is the foreign key
+                .OnDelete(DeleteBehavior.Cascade);
 
             #region Initial
             string passwordHash = "D2099AC355F75F82F1339FB36B4D90F92A913573AAAADD0672553DF629E2EC97886126B2DDCA77C4237C44C4D05290B4B5FBB67EE509B94B232756BCE5F83C20";

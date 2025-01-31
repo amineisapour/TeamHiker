@@ -10,6 +10,9 @@ using AuthenticationMicroservice.Domain.ViewModels;
 using GiliX.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using AuthenticationMicroservice.Core.Interfaces;
+using AuthenticationMicroservice.SimplePersistence;
+using Microsoft.EntityFrameworkCore;
 
 namespace AuthenticationMicroservice.Api.Controllers
 {
@@ -17,15 +20,20 @@ namespace AuthenticationMicroservice.Api.Controllers
     {
         #region Fields
 
-        private readonly Core.Interfaces.IAccountService _accountService;
+        private readonly IAccountService _accountService;
 
         #endregion
 
         #region Constructor
 
-        public AccountController(Core.Interfaces.IAccountService accountService,
-            Persistence.IUnitOfWork unitOfWork,
-            Persistence.IQueryUnitOfWork queryUnitOfWork) : base(unitOfWork, queryUnitOfWork)
+        //public AccountController(Core.Interfaces.IAccountService accountService,
+        //    Persistence.IUnitOfWork unitOfWork,
+        //    Persistence.IQueryUnitOfWork queryUnitOfWork) : base(unitOfWork, queryUnitOfWork)
+        //{
+        //    _accountService = accountService;
+        //}
+
+        public AccountController(IAccountService accountService, ApplicationDbContext dbContext) : base(dbContext)
         {
             _accountService = accountService;
         }
@@ -76,19 +84,29 @@ namespace AuthenticationMicroservice.Api.Controllers
                 var jwtToken = _accountService.GenerateJwtToken(user);
                 var refreshToken = _accountService.GenerateRefreshToken(IpAddress());
 
-                await UnitOfWork.RefreshTokens.InsertAsync(refreshToken);
+                //await UnitOfWork.RefreshTokens.InsertAsync(refreshToken);
+                await DbContext.RefreshTokens.AddAsync(refreshToken);
                 user.RefreshTokens.Add(refreshToken);
 
                 // remove old refresh tokens from user
                 //_accountService.RemoveOldRefreshTokens(user);
                 RemoveOldRefreshTokens(user);
 
+                //await UnitOfWork.Users.UpdateAsync(user);
+                DbContext.Users.Update(user);
+
                 // save changes to db
-                await UnitOfWork.Users.UpdateAsync(user);
+                //await UnitOfWork.SaveAsync();
+                await DbContext.SaveChangesAsync();
 
-                await UnitOfWork.SaveAsync();
+                //var userInfo = await UnitOfWork.UserInformations.GetUserInfoByUserIdAsync(user.Id);
 
-                var userInfo = await UnitOfWork.UserInformations.GetUserInfoByUserIdAsync(user.Id);
+                var userInfo = await DbContext.UserInformations.SingleOrDefaultAsync(u => u.UserId == user.Id);
+                if (userInfo == null)
+                {
+                    result.WithError("UserInfo Not Found!");
+                    return result.ConvertToDtxResult();
+                }
                 var authenticateResponse = new AuthenticateResponse(user, userInfo, jwtToken, refreshToken.Token);
 
                 result.WithSuccess(successMessage: Resources.Messages.Successes.SuccessLogin);
@@ -103,6 +121,13 @@ namespace AuthenticationMicroservice.Api.Controllers
                 {
                     result.WithError(ex.InnerException.Message);
                 }
+
+                //_logger.Error($"{GetThis()}: {GetAllErrorMessages(ex)}");
+            }
+            finally 
+            {
+                DbContext.Dispose();
+                //DbContextDispose();
             }
             //System.Threading.Thread.Sleep(3000);
             return result.ConvertToDtxResult();
@@ -110,8 +135,8 @@ namespace AuthenticationMicroservice.Api.Controllers
 
         [AllowAnonymous]
         [HttpPost("refresh-token")]
-        [ProducesResponseType(type: typeof(Result<AuthenticateResponse>), statusCode: StatusCodes.Status200OK)]
-        [ProducesResponseType(type: typeof(Result), statusCode: StatusCodes.Status400BadRequest)]
+        //[ProducesResponseType(type: typeof(Result<AuthenticateResponse>), statusCode: StatusCodes.Status200OK)]
+        //[ProducesResponseType(type: typeof(Result), statusCode: StatusCodes.Status400BadRequest)]
         public async Task<Result<AuthenticateResponse>> RefreshToken([FromBody] AuthenticateResponse tokenElemnt)
         {
             var result = new FluentResults.Result<AuthenticateResponse>();
@@ -136,7 +161,8 @@ namespace AuthenticationMicroservice.Api.Controllers
 
                 //var response = _userService.RefreshToken(token, IpAddress());
 
-                var user = await QueryUnitOfWork.Users.GetUserByRefreshTokenAsync(token);
+                //var user = await QueryUnitOfWork.Users.GetUserByRefreshTokenAsync(token);
+                var user = await DbContext.Users.SingleOrDefaultAsync(u => u.RefreshTokens.Any(t => t.Token == token));
                 if (user == null)
                 {
                     result.WithError("Invalid token");
@@ -149,8 +175,11 @@ namespace AuthenticationMicroservice.Api.Controllers
                     // revoke all descendant tokens in case this token has been compromised
                     _accountService.RevokeDescendantRefreshTokens(refreshToken, user, IpAddress(), $"Attempted reuse of revoked ancestor token: {token}");
 
-                    await UnitOfWork.Users.UpdateAsync(user);
-                    await UnitOfWork.SaveAsync();
+                    //await UnitOfWork.Users.UpdateAsync(user);
+                    //await UnitOfWork.SaveAsync();
+                    DbContext.Users.Update(user);
+                    await DbContext.SaveChangesAsync();
+
                 }
 
                 if (!refreshToken.IsActive)
@@ -162,8 +191,10 @@ namespace AuthenticationMicroservice.Api.Controllers
 
                 // replace old refresh token with a new one (rotate token)
                 var newRefreshToken = _accountService.RotateRefreshToken(refreshToken, IpAddress());
-                await UnitOfWork.RefreshTokens.UpdateAsync(refreshToken);
-                await UnitOfWork.RefreshTokens.InsertAsync(newRefreshToken);
+                //await UnitOfWork.RefreshTokens.UpdateAsync(refreshToken);
+                //await UnitOfWork.RefreshTokens.InsertAsync(newRefreshToken);
+                DbContext.RefreshTokens.Update(refreshToken);
+                await DbContext.RefreshTokens.AddAsync(newRefreshToken);
 
                 user.RefreshTokens.Add(newRefreshToken);
 
@@ -172,12 +203,20 @@ namespace AuthenticationMicroservice.Api.Controllers
                 RemoveOldRefreshTokens(user);
 
                 // save changes to db
-                await UnitOfWork.Users.UpdateAsync(user);
-                await UnitOfWork.SaveAsync();
+                //await UnitOfWork.Users.UpdateAsync(user);
+                //await UnitOfWork.SaveAsync();
+                DbContext.Users.Update(user);
+                await DbContext.SaveChangesAsync();
 
                 var jwtToken = _accountService.GenerateJwtToken(user);
 
-                var userInfo = await UnitOfWork.UserInformations.GetUserInfoByUserIdAsync(user.Id);
+                //var userInfo = await UnitOfWork.UserInformations.GetUserInfoByUserIdAsync(user.Id);
+                var userInfo = await DbContext.UserInformations.SingleOrDefaultAsync(u => u.UserId == user.Id);
+                if (userInfo == null)
+                {
+                    result.WithError("UserInfo Not Found!");
+                    return result.ConvertToDtxResult();
+                }
                 var authenticateResponse = new AuthenticateResponse(user, userInfo, jwtToken, newRefreshToken.Token);
 
                 result.WithSuccess("Ok");
@@ -198,8 +237,8 @@ namespace AuthenticationMicroservice.Api.Controllers
 
         [AllowAnonymous]
         [HttpPost("revoke-token")]
-        [ProducesResponseType(type: typeof(Result), statusCode: StatusCodes.Status200OK)]
-        [ProducesResponseType(type: typeof(Result), statusCode: StatusCodes.Status400BadRequest)]
+        //[ProducesResponseType(type: typeof(Result), statusCode: StatusCodes.Status200OK)]
+        //[ProducesResponseType(type: typeof(Result), statusCode: StatusCodes.Status400BadRequest)]
         public async Task<Result> RevokeToken(RevokeTokenRequest model)
         {
             var result = new FluentResults.Result();
@@ -221,7 +260,8 @@ namespace AuthenticationMicroservice.Api.Controllers
                     return result.ConvertToDtxResult();
                 }
 
-                var user = await QueryUnitOfWork.Users.GetUserByRefreshTokenAsync(token);
+                //var user = await QueryUnitOfWork.Users.GetUserByRefreshTokenAsync(token);
+                var user = await DbContext.Users.SingleOrDefaultAsync(u => u.RefreshTokens.Any(t => t.Token == token)); ;
                 if (user == null)
                 {
                     result.WithError("Invalid token");
@@ -240,8 +280,10 @@ namespace AuthenticationMicroservice.Api.Controllers
                 // revoke token and save
                 _accountService.RevokeRefreshToken(refreshToken, IpAddress(), "Revoked without replacement");
 
-                await UnitOfWork.Users.UpdateAsync(user);
-                await UnitOfWork.SaveAsync();
+                //await UnitOfWork.Users.UpdateAsync(user);
+                //await UnitOfWork.SaveAsync();
+                DbContext.Users.Update(user);
+                await DbContext.SaveChangesAsync();
 
                 result.WithSuccess("Token revoked");
             }
@@ -258,12 +300,13 @@ namespace AuthenticationMicroservice.Api.Controllers
 
         [AllowAnonymous]
         [HttpPost("register")]
-        [ProducesResponseType(type: typeof(Result<AuthenticateResponse>), statusCode: StatusCodes.Status200OK)]
-        [ProducesResponseType(type: typeof(Result), statusCode: StatusCodes.Status400BadRequest)]
+        //[ProducesResponseType(type: typeof(Result<AuthenticateResponse>), statusCode: StatusCodes.Status200OK)]
+        //[ProducesResponseType(type: typeof(Result), statusCode: StatusCodes.Status400BadRequest)]
         public async Task<Result<AuthenticateResponse>> Register([FromBody] RegisterUserViewModel registerUser)
         {
             var result = new FluentResults.Result<AuthenticateResponse>();
-            await using var transaction = await UnitOfWork.Contex.Database.BeginTransactionAsync();
+            //await using var transaction = await UnitOfWork.Contex.Database.BeginTransactionAsync();
+            await using var transaction = await DbContext.Database.BeginTransactionAsync();
             try
             {
                 if (!ModelState.IsValid)
@@ -289,7 +332,8 @@ namespace AuthenticationMicroservice.Api.Controllers
                     PasswordHash = passwordDate.PasswordHash,
                     PasswordSalt = passwordDate.PasswordSalt
                 };
-                await UnitOfWork.Users.InsertAsync(newUser);
+                //await UnitOfWork.Users.InsertAsync(newUser);
+                await DbContext.Users.AddAsync(newUser);
                 var newUserInfo = new UserInformation
                 {
                     Birthdate = registerUser.Birthdate,
@@ -299,10 +343,13 @@ namespace AuthenticationMicroservice.Api.Controllers
                     NationalId = registerUser.NationalId,
                     User = newUser
                 };
-                await UnitOfWork.UserInformations.InsertAsync(newUserInfo);
-                await UnitOfWork.SaveAsync();
+                //await UnitOfWork.UserInformations.InsertAsync(newUserInfo);
+                //await UnitOfWork.SaveAsync();
+                await DbContext.UserInformations.AddAsync(newUserInfo);
+                await DbContext.SaveChangesAsync();
 
-                var roleList = await UnitOfWork.Roles.GetAllAsync();
+                //var roleList = await UnitOfWork.Roles.GetAllAsync();
+                var roleList = await DbContext.Roles.ToListAsync();
                 var role = roleList.FirstOrDefault(p => p.Name == "User");
                 if (role != null)
                 {
@@ -312,25 +359,34 @@ namespace AuthenticationMicroservice.Api.Controllers
                         User = newUser
                     };
 
-                    await UnitOfWork.UserRoles.InsertAsync(userRole);
-                    await UnitOfWork.SaveAsync();
+                    //await UnitOfWork.UserRoles.InsertAsync(userRole);
+                    //await UnitOfWork.SaveAsync();
+                    await DbContext.UserRoles.AddAsync(userRole);
+                    await DbContext.SaveChangesAsync();
 
-                    newUser.UserRoles = new List<UserRole> { userRole };
+                    //Amin
+                    //newUser.UserRoles = new List<UserRole> { userRole };
+                    newUser.UserRoles.Add(userRole);
                 }
 
 
                 var jwtToken = _accountService.GenerateJwtToken(newUser);
                 var refreshToken = _accountService.GenerateRefreshToken(IpAddress());
 
-                await UnitOfWork.RefreshTokens.InsertAsync(refreshToken);
-                //newUser.RefreshTokens.Add(refreshToken);
-                newUser.RefreshTokens = new List<RefreshToken> { refreshToken };
+                //await UnitOfWork.RefreshTokens.InsertAsync(refreshToken);
+                await DbContext.RefreshTokens.AddAsync(refreshToken);
+
+                //Amin
+                //newUser.RefreshTokens = new List<RefreshToken> { refreshToken };
+                newUser.RefreshTokens.Add(refreshToken);
 
                 // remove old refresh tokens from user
                 //RemoveOldRefreshTokens(newUser);
 
-                await UnitOfWork.Users.UpdateAsync(newUser);
-                await UnitOfWork.SaveAsync();
+                //await UnitOfWork.Users.UpdateAsync(newUser);
+                //await UnitOfWork.SaveAsync();
+                DbContext.Users.Update(newUser);
+                await DbContext.SaveChangesAsync();
 
                 var authenticateResponse = new AuthenticateResponse(newUser, newUserInfo, jwtToken, refreshToken.Token);
 
@@ -356,20 +412,21 @@ namespace AuthenticationMicroservice.Api.Controllers
 
         [PermissionAuthorize(Core.Config.PermissionsConfig.Account.CanRead)]
         [HttpGet("get-all-user")]
-        [ProducesResponseType(type: typeof(Result<IList<UserListViewModel>>), statusCode: StatusCodes.Status200OK)]
-        [ProducesResponseType(type: typeof(Result), statusCode: StatusCodes.Status400BadRequest)]
+        //[ProducesResponseType(type: typeof(Result<IList<UserListViewModel>>), statusCode: StatusCodes.Status200OK)]
+        //[ProducesResponseType(type: typeof(Result), statusCode: StatusCodes.Status400BadRequest)]
         public async Task<Result<IList<UserListViewModel>>> GetAllUser()
         {
             var result = new FluentResults.Result<IList<UserListViewModel>>();
             try
             {
-                var userList = await QueryUnitOfWork.Users.GetAllAsync();
+                //var userList = await QueryUnitOfWork.Users.GetAllAsync();
+                var userList = await DbContext.Users.ToListAsync();
                 var returnList =
                     new List<UserListViewModel>();
                 foreach (var user in userList)
                 {
-                    var userInfo =
-                        await QueryUnitOfWork.UserInformations.GetUserInfoByUserIdAsync(user.Id);
+                    var userInfo = await DbContext.UserInformations.SingleOrDefaultAsync(u => u.UserId == user.Id);
+                    //var userInfo = await QueryUnitOfWork.UserInformations.GetUserInfoByUserIdAsync(user.Id);
                     returnList.Add(new UserListViewModel()
                     {
                         RegisterDateTime = user.RegisterDateTime,
@@ -397,15 +454,15 @@ namespace AuthenticationMicroservice.Api.Controllers
         //[PermissionAuthorize(Core.Config.PermissionsConfig.Account.CanRead)]
         [AllowAnonymous]
         [HttpGet("{id}/refresh-token")]
-        [ProducesResponseType(type: typeof(Result<IList<UserListViewModel>>), statusCode: StatusCodes.Status200OK)]
-        [ProducesResponseType(type: typeof(Result), statusCode: StatusCodes.Status400BadRequest)]
+        //[ProducesResponseType(type: typeof(Result<IList<UserListViewModel>>), statusCode: StatusCodes.Status200OK)]
+        //[ProducesResponseType(type: typeof(Result), statusCode: StatusCodes.Status400BadRequest)]
         public async Task<Result<IList<RefreshToken>>> GetRefreshTokens(Guid id)
         {
             var result = new FluentResults.Result<IList<RefreshToken>>();
             try
             {
-                var user =
-                    await QueryUnitOfWork.Users.GetUserByUserIdAsync(id);
+                //var user = await QueryUnitOfWork.Users.GetUserByUserIdAsync(id);
+                var user = await DbContext.Users.SingleOrDefaultAsync(u => u.Id == id);
 
                 result.WithSuccess("Ok");
                 result.WithValue(value: user.RefreshTokens);
@@ -419,17 +476,17 @@ namespace AuthenticationMicroservice.Api.Controllers
 
         [PermissionAuthorize(Core.Config.PermissionsConfig.Account.CanRead)]
         [HttpGet("get-user/{id}")]
-        [ProducesResponseType(type: typeof(Result<UserListViewModel>), statusCode: StatusCodes.Status200OK)]
-        [ProducesResponseType(type: typeof(Result), statusCode: StatusCodes.Status400BadRequest)]
+        //[ProducesResponseType(type: typeof(Result<UserListViewModel>), statusCode: StatusCodes.Status200OK)]
+        //[ProducesResponseType(type: typeof(Result), statusCode: StatusCodes.Status400BadRequest)]
         public async Task<Result<UserListViewModel>> GetById(Guid id)
         {
             var result = new FluentResults.Result<UserListViewModel>();
             try
             {
-                var user =
-                    await QueryUnitOfWork.Users.GetUserByUserIdAsync(id);
-                var userInfo =
-                    await QueryUnitOfWork.UserInformations.GetUserInfoByUserIdAsync(user.Id);
+                //var user = await QueryUnitOfWork.Users.GetUserByUserIdAsync(id);
+                var user = await DbContext.Users.SingleOrDefaultAsync(u => u.Id == id);
+                //var userInfo = await QueryUnitOfWork.UserInformations.GetUserInfoByUserIdAsync(user.Id);
+                var userInfo = await DbContext.UserInformations.SingleOrDefaultAsync(u => u.UserId == user.Id);
 
                 var userListViewModel = new UserListViewModel()
                 {
@@ -467,7 +524,8 @@ namespace AuthenticationMicroservice.Api.Controllers
 
         private async Task<User> GetUserAsync(string username)
         {
-            return await UnitOfWork.Users.GetByUsernameAsync(username.ToLower());
+            //return await UnitOfWork.Users.GetByUsernameAsync(username.ToLower());
+            return await DbContext.Users.SingleOrDefaultAsync(u => u.Username == username.ToLower());
         }
 
         /*
@@ -500,7 +558,8 @@ namespace AuthenticationMicroservice.Api.Controllers
             var listOldRefreshToken = _accountService.RemoveOldRefreshTokens(user);
             foreach (var oldRefreshToken in listOldRefreshToken)
             {
-                UnitOfWork.RefreshTokens.DeleteAsync(oldRefreshToken);
+                //UnitOfWork.RefreshTokens.DeleteAsync(oldRefreshToken);
+                DbContext.RefreshTokens.Remove(oldRefreshToken);
                 user.RefreshTokens.Remove(oldRefreshToken);
             }
         }
@@ -521,35 +580,44 @@ namespace AuthenticationMicroservice.Api.Controllers
                 //*************************  Permission
 
                 Permission p1 = new Permission { Name = "Permission.Account.CanEdit" };
-                await UnitOfWork.Permissions.InsertAsync(p1);
+                //await UnitOfWork.Permissions.InsertAsync(p1);
+                await DbContext.Permissions.AddAsync(p1);
 
                 Permission p2 = new Permission { Name = "Permission.Account.CanDelete" };
-                await UnitOfWork.Permissions.InsertAsync(p2);
+                //await UnitOfWork.Permissions.InsertAsync(p2);
+                await DbContext.Permissions.AddAsync(p2);
 
                 Permission p3 = new Permission { Name = "Permission.Action.FullAccess" };
-                await UnitOfWork.Permissions.InsertAsync(p3);
+                //await UnitOfWork.Permissions.InsertAsync(p3);
+                await DbContext.Permissions.AddAsync(p3);
 
                 Permission p4 = new Permission { Name = "Permission.Account.CanRead" };
-                await UnitOfWork.Permissions.InsertAsync(p4);
+                //await UnitOfWork.Permissions.InsertAsync(p4);
+                await DbContext.Permissions.AddAsync(p4);
 
                 Permission p5 = new Permission { Name = "Permission.Account.CanAdd" };
-                await UnitOfWork.Permissions.InsertAsync(p5);
+                //await UnitOfWork.Permissions.InsertAsync(p5);
+                await DbContext.Permissions.AddAsync(p5);
 
                 //*************************  Role
 
                 Role r1 = new Role { Name = "Admin", };
-                await UnitOfWork.Roles.InsertAsync(r1);
+                //await UnitOfWork.Roles.InsertAsync(r1);
+                await DbContext.Roles.AddAsync(r1);
 
                 Role r2 = new Role { Name = "User", };
-                await UnitOfWork.Roles.InsertAsync(r2);
+                //await UnitOfWork.Roles.InsertAsync(r2);
+                await DbContext.Roles.AddAsync(r2);
 
                 //*************************  RolePermission
 
                 RolePermission rp1 = new RolePermission { Role = r2, Permission = p4 };
-                await UnitOfWork.RolePermissions.InsertAsync(rp1);
+                //await UnitOfWork.RolePermissions.InsertAsync(rp1);
+                await DbContext.RolePermissions.AddAsync(rp1);
 
                 RolePermission rp2 = new RolePermission { Role = r1, Permission = p3 };
-                await UnitOfWork.RolePermissions.InsertAsync(rp2);
+                //await UnitOfWork.RolePermissions.InsertAsync(rp2);
+                await DbContext.RolePermissions.AddAsync(rp2);
 
                 //*************************  User & UserInformation
 
@@ -560,7 +628,8 @@ namespace AuthenticationMicroservice.Api.Controllers
                     PasswordHash = pd1.PasswordHash,
                     PasswordSalt = pd1.PasswordSalt
                 };
-                await UnitOfWork.Users.InsertAsync(u1);
+                //await UnitOfWork.Users.InsertAsync(u1);
+                await DbContext.Users.AddAsync(u1);
 
                 var uif1 = new UserInformation
                 {
@@ -571,7 +640,8 @@ namespace AuthenticationMicroservice.Api.Controllers
                     NationalId = "111111111",
                     User = u1
                 };
-                await UnitOfWork.UserInformations.InsertAsync(uif1);
+                //await UnitOfWork.UserInformations.InsertAsync(uif1);
+                await DbContext.UserInformations.AddAsync(uif1);
 
                 var pd2 = _accountService.CreatePassword("1234");
                 var u2 = new User
@@ -580,7 +650,8 @@ namespace AuthenticationMicroservice.Api.Controllers
                     PasswordHash = pd2.PasswordHash,
                     PasswordSalt = pd2.PasswordSalt
                 };
-                await UnitOfWork.Users.InsertAsync(u2);
+                //await UnitOfWork.Users.InsertAsync(u2);
+                await DbContext.Users.AddAsync(u2);
 
                 var uif2 = new UserInformation
                 {
@@ -591,19 +662,23 @@ namespace AuthenticationMicroservice.Api.Controllers
                     NationalId = "0068272618",
                     User = u2
                 };
-                await UnitOfWork.UserInformations.InsertAsync(uif2);
+                //await UnitOfWork.UserInformations.InsertAsync(uif2);
+                await DbContext.UserInformations.AddAsync(uif2);
 
                 //*************************  UserRole
 
                 var ur1 = new UserRole { User = u1, Role = r1 };
-                await UnitOfWork.UserRoles.InsertAsync(ur1);
+                //await UnitOfWork.UserRoles.InsertAsync(ur1)
+                await DbContext.UserRoles.AddAsync(ur1);
 
                 var ur2 = new UserRole { User = u2, Role = r2 };
-                await UnitOfWork.UserRoles.InsertAsync(ur2);
+                //await UnitOfWork.UserRoles.InsertAsync(ur2);
+                await DbContext.UserRoles.AddAsync(ur2);
 
 
                 //*************************  Save Data
-                await UnitOfWork.SaveAsync();
+                //await UnitOfWork.SaveAsync();
+                await DbContext.SaveChangesAsync();
 
                 result.WithSuccess("All data has been saved successfully.");
             }

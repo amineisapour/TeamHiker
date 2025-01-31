@@ -21,7 +21,6 @@ namespace AuthenticationMicroservice.SimplePersistence.Configurations
                 UserId = Guid.Parse("4315F7CF-B05E-496D-9CB9-9D256AA6BB38"),
             };
             builder.HasData(data: userRoleData);
-
             #endregion
         }
     }

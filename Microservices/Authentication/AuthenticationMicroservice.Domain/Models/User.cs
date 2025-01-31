@@ -12,7 +12,7 @@ namespace AuthenticationMicroservice.Domain.Models
             //UserPermissions = new List<UserPermission>();
             //RefreshTokens = new List<RefreshToken>();
 
-            UserInformations = new List<UserInformation>();
+            //UserInformations = new List<UserInformation>();
             RefreshTokens = new List<RefreshToken>();
             UserRoles = new List<UserRole>();
             UserPermissions = new List<UserPermission>();
@@ -60,7 +60,7 @@ namespace AuthenticationMicroservice.Domain.Models
         //    set => _userRoles = value;
         //}
 
-        public virtual IList<UserInformation> UserInformations { get; private set; }
+        public virtual UserInformation UserInformation { get; private set; }  // One-to-one relationship
 
         public virtual IList<RefreshToken> RefreshTokens { get; private set; }
 
