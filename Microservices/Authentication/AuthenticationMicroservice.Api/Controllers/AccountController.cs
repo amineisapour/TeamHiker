@@ -124,11 +124,10 @@ namespace AuthenticationMicroservice.Api.Controllers
 
                 //_logger.Error($"{GetThis()}: {GetAllErrorMessages(ex)}");
             }
-            finally 
-            {
-                DbContext.Dispose();
-                //DbContextDispose();
-            }
+            //finally 
+            //{
+            //    DbContext.Dispose();
+            //}
             //System.Threading.Thread.Sleep(3000);
             return result.ConvertToDtxResult();
         }
@@ -498,7 +497,14 @@ namespace AuthenticationMicroservice.Api.Controllers
                     Gender = userInfo?.Gender,
                     FirstName = userInfo != null ? userInfo.FirstName : "",
                     LastName = userInfo != null ? userInfo.LastName : "",
-                    NationalId = userInfo != null ? userInfo.NationalId : ""
+                    NationalId = userInfo != null ? userInfo.NationalId : "",
+                    Bio = userInfo != null ? userInfo.Bio :"",
+                    Certifications = userInfo != null ? userInfo.Certifications : "",
+                    Email = userInfo != null ? userInfo.Email : "",
+                    Equipment = userInfo != null ? userInfo.Equipment : "",
+                    Language = userInfo != null ? userInfo.Language : "",
+                    Phone = userInfo != null ? userInfo.Phone : "",
+                    SocialMediaLinks = userInfo != null ? userInfo.SocialMediaLinks : ""
                 };
 
                 result.WithSuccess("Ok");

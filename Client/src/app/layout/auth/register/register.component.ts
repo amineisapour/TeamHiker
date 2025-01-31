@@ -49,7 +49,7 @@ export class RegisterComponent implements OnInit {
       gender: ['', [Validators.required]],
       firstName: ['', [Validators.required, Validators.maxLength(50)]],
       lastName: ['', [Validators.required, Validators.maxLength(50)]],
-      nationalId: ['', ValidationService.nationalIdValidator],
+      //nationalId: ['', ValidationService.nationalIdValidator],
       birthdate: ['', [Validators.required]]
     });
   }
@@ -76,7 +76,7 @@ export class RegisterComponent implements OnInit {
       "Password": data.password,
       "FirstName": data.firstName,
       "LastName": data.lastName,
-      "NationalId": data.nationalId,
+      //"NationalId": data.nationalId,
       "Gender": (data.gender == Gender.Man) ? 1 : 0,
       "Birthdate": AppDateTime.getFormatDateTime(data.birthdate, DateTimeFormat.YyyyMmDd)
     };

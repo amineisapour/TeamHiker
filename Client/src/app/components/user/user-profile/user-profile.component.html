@@ -1,8 +1,130 @@
-<h1>user-profile works!</h1>
-<p style="height: 550px;">
-    {{ currentUser.fullName | getFullnameWithGender: currentUser.gender}}
+<h1>{{ currentUser.fullName | getFullnameWithGender: currentUser.gender}}</h1>
+<p></p>
+<br>
+<form [formGroup]="registerForm" (ngSubmit)="register(registerForm.value)" class="example-form">
+    <mat-form-field appearance="standard" class="example-full-width">
+        <mat-label>Gender</mat-label>
+        <mat-select formControlName="gender" required>
+          <mat-option>Select an option</mat-option>
+          <mat-option *ngFor="let gen of userGender | keyvalue" [value]="gen.value">{{ gen.key }}</mat-option>
+        </mat-select>
+
+        <!-- <mat-error *ngIf="registerForm.controls['gender'].hasError('required')">
+            Please choose a gender
+        </mat-error> -->
+        <mat-error *ngIf="!registerForm.controls['gender'].valid && registerForm.controls['gender'].touched">
+            {{getErrorMessage('gender')}}
+        </mat-error>
+      </mat-form-field>
+    <br>
+    <mat-form-field appearance="standard" class="example-full-width">
+        <mat-label>First Name</mat-label>
+        <input matInput formControlName="firstName" type="text" autocomplete="off" required [maxlength]="50">
+        <mat-error *ngIf="!registerForm.controls['firstName'].valid && registerForm.controls['firstName'].touched">
+            {{getErrorMessage('firstName')}}
+        </mat-error>
+    </mat-form-field>
+    <br>
+    <mat-form-field appearance="standard" class="example-full-width">
+        <mat-label>Last Name</mat-label>
+        <input matInput formControlName="lastName" type="text" autocomplete="off" required [maxlength]="50">
+        <mat-error *ngIf="!registerForm.controls['lastName'].valid && registerForm.controls['lastName'].touched">
+            {{getErrorMessage('lastName')}}
+        </mat-error>
+    </mat-form-field>
+    <br>
+    <mat-form-field appearance="standard" class="example-full-width">
+        <mat-label>Bio/Description</mat-label>
+        <textarea matInput formControlName="bio" autocomplete="off" required rows="7"></textarea>
+        <mat-error *ngIf="!registerForm.controls['bio'].valid && registerForm.controls['bio'].touched">
+            {{getErrorMessage('bio')}}
+        </mat-error>
+    </mat-form-field>
+    <br>
+    <mat-form-field appearance="standard" class="example-full-width">
+        <mat-label>Language</mat-label>
+        <mat-select formControlName="language" multiple required>
+            <mat-option *ngFor="let lang of languageList" [value]="lang">{{lang}}</mat-option>
+          </mat-select>
+        <mat-error *ngIf="!registerForm.controls['language'].valid && registerForm.controls['language'].touched">
+            {{getErrorMessage('language')}}
+        </mat-error>
+    </mat-form-field>
+    <br>
+    <mat-form-field appearance="standard" class="example-full-width">
+        <mat-label>Certifications</mat-label>
+        <mat-chip-list #certification aria-label="Certification selection">
+            <mat-chip formControlName="certification" *ngFor="let certification of certificationList" [selectable]="selectable"
+                     [removable]="removable" (removed)="remove(certification)">
+              {{certification.name}}
+              <button matChipRemove *ngIf="removable" style="color: red; padding-right: 15px; font-weight: bold;">
+                X
+              </button>
+            </mat-chip>
+            <input 
+                   placeholder="New Certification..."
+                   [matChipInputFor]="certification"
+                   [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+                   [matChipInputAddOnBlur]="addOnBlur"
+                   (matChipInputTokenEnd)="add($event)">
+          </mat-chip-list>
+    </mat-form-field>
+    <br>
+    <mat-form-field appearance="standard" class="example-full-width">
+        <mat-label>Email</mat-label>
+        <input matInput formControlName="email" type="text" autocomplete="off" required email>
+        <mat-error *ngIf="!registerForm.controls['email'].valid && registerForm.controls['email'].touched">
+            {{getErrorMessage('email')}}
+        </mat-error>
+    </mat-form-field>
+    <br>
+    <mat-form-field appearance="standard" class="example-full-width">
+        <mat-label>Phone Number</mat-label>
+        <input matInput formControlName="phone" type="text" autocomplete="off" required>
+        <mat-error *ngIf="!registerForm.controls['phone'].valid && registerForm.controls['phone'].touched">
+            {{getErrorMessage('phone')}}
+        </mat-error>
+    </mat-form-field>
+    <br>
+    <mat-form-field appearance="standard" class="example-full-width">
+        <mat-label>Social Media Links</mat-label>
+        <mat-chip-list #socialMediaLinks aria-label="SocialMedia selection">
+            <mat-chip formControlName="socialMediaLinks" *ngFor="let socialMedia of socialMediaList" [selectable]="selectable_socialMedia"
+                     [removable]="removable_socialMedia" (removed)="remove_socialMediaLinks(socialMedia)">
+              {{socialMedia.name}}
+              <button matChipRemove *ngIf="removable_socialMedia" style="color: red; padding-right: 15px; font-weight: bold;">
+                X
+              </button>
+            </mat-chip>
+            <input 
+                   placeholder="New Social Media Links..."
+                   [matChipInputFor]="socialMediaLinks"
+                   [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+                   [matChipInputAddOnBlur]="addOnBlur_socialMedia"
+                   (matChipInputTokenEnd)="add_socialMediaLinks($event)">
+          </mat-chip-list>
+    </mat-form-field>
+    <br>
+    <mat-form-field appearance="standard" class="example-full-width">
+        <mat-label>Equipment Available</mat-label>
+        <textarea matInput formControlName="equipment" autocomplete="off" rows="7"></textarea>
+        <mat-error *ngIf="!registerForm.controls['equipment'].valid && registerForm.controls['equipment'].touched">
+            {{getErrorMessage('equipment')}}
+        </mat-error>
+    </mat-form-field>
+</form>
+<br>
+<br>
+<br>
+<p style="text-align: center;">
+    <button mat-raised-button type="submit" color="primary" class="btn-block"
+    [disabled]="!registerForm.valid">Submit</button>
 </p>
-<div style="bottom:0;">
+<br>
+<br>
+            
+
+<!-- <div style="bottom:0;">
     sss
     sds
     <br>
@@ -68,4 +190,4 @@
     sds
     <br>
     <span style="color: red;">Hi</span>
-</div>
+</div> -->

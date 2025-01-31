@@ -20,29 +20,24 @@ namespace AuthenticationMicroservice.Api.Infrastructure
         //    QueryUnitOfWork = queryUnitOfWork;
         //}
 
-        private ApplicationDbContext _dbContext;
-        protected ApplicationDbContext DbContext
-        {
-            get
-            {
-                if (_dbContext == null)
-                {
-                    _dbContext = new ApplicationDbContext();
-                }
-                return _dbContext;
-            }
-        }
+        //private ApplicationDbContext _dbContext;
+        //protected ApplicationDbContext DbContext
+        //{
+        //    get
+        //    {
+        //        if (_dbContext == null)
+        //        {
+        //            _dbContext = new ApplicationDbContext();
+        //        }
+        //        return _dbContext;
+        //    }
+        //}
 
-        //protected ApplicationDbContext DbContext { get; }
+        protected ApplicationDbContext DbContext { get; }
 
         public ApiControllerBase(ApplicationDbContext dbContext)
         {
-            _dbContext = dbContext;
-        }
-
-        protected void DbContextDispose()
-        {
-            _dbContext.Dispose();
+            DbContext = dbContext;
         }
 
         public string GetThis([System.Runtime.CompilerServices.CallerMemberName] string memberName = "")
