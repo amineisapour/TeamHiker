@@ -42,7 +42,7 @@ export class UserListComponent implements OnInit {
     this.accountService.getAllUser().subscribe(
       (result: HttpRequestResult<User[]>) => {
         if (result.isFailed) {
-          this.snackbar.openSnackBar(result.errors, MessageType.Error);
+          this.snackbar.openSnackBar(result.errors, MessageType.Error, 3);
         }
         else {
           if (result.value != null) {
@@ -53,7 +53,7 @@ export class UserListComponent implements OnInit {
             this.dataSource.sort = this.sort;
           } else {
             //console.log('problem!');
-            this.snackbar.openSnackBar('problem!', MessageType.Error);
+            this.snackbar.openSnackBar('problem!', MessageType.Error, 3);
           }
         }
       },
