@@ -53,6 +53,19 @@ export class AccountService {
             );
     }
 
+    public editProfile(requestData: any): Observable<HttpRequestResult<null>> {
+        const requestUrl: string = this.baseAuthenticationUrl + 'profile/update';
+        return this.http.post<HttpRequestResult<null>>(requestUrl, requestData, this.httpOptions)
+            .pipe(
+                map(result => {
+                    return result;
+                }),
+                catchError(e => {
+                    return throwError(e)
+                })
+            );
+    }
+
     public refresh(): Observable<HttpRequestResult<AuthenticateData>> {
         const requestUrl: string = this.baseAuthenticationUrl + 'auth/refresh-token';
         const refreshToken: string = this.getRefreshToken();

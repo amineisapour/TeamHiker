@@ -46,6 +46,7 @@ export class UserProfileComponent implements OnInit {
     { key: 'Man', value: 1 }
   ];
   public selectedId: number;
+  
 
   languageList: string[] = ['English', 'Chinese', 'Hindi', 'Spanish', 'French', 'Arabic', 'Bengali', 'Portuguese', 'Russian', 'German', 'Japanese', 'Turkish', 'Persian', 'Indonesian'];
 
@@ -120,6 +121,7 @@ export class UserProfileComponent implements OnInit {
     //console.log(this.socialMediaList);
     //console.log(this.certificationList);
     const model = {
+      "UserId": this.currentUser.id,
       "FirstName": data.firstName,
       "LastName": data.lastName,
       "Gender": data.gender,
@@ -133,10 +135,24 @@ export class UserProfileComponent implements OnInit {
       "Language": data.language.join(', ')
     };
 
-    console.table(model);
-    console.log(model);
-  //  this.accountService.register(model).subscribe(
-  //  );
+    //console.table(model);
+    //console.log(model);
+    this.accountService.editProfile(model).subscribe(
+      (result: HttpRequestResult<null>) => {
+          if (result.isFailed) {
+            this.snackbar.openSnackBar(result.errors, MessageType.Error, 3);
+          } else {
+            if (result.isSuccess) {
+              this.snackbar.openSnackBar('Profile information was successfully updated.', MessageType.Success, 3);
+            } else {
+              this.snackbar.openSnackBar('problem!', MessageType.Error, 3);
+            }
+          }
+        },
+        (error: HttpErrorResponse) => {
+          return ErrorHandleHelper.handleError(error, this.snackbar);
+        }
+    );
   }
 
   getErrorMessage(element: string): string {

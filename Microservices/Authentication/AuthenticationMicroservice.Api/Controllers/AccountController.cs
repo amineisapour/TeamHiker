@@ -134,8 +134,8 @@ namespace AuthenticationMicroservice.Api.Controllers
 
         [AllowAnonymous]
         [HttpPost("refresh-token")]
-        //[ProducesResponseType(type: typeof(Result<AuthenticateResponse>), statusCode: StatusCodes.Status200OK)]
-        //[ProducesResponseType(type: typeof(Result), statusCode: StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(type: typeof(Result<AuthenticateResponse>), statusCode: StatusCodes.Status200OK)]
+        [ProducesResponseType(type: typeof(Result), statusCode: StatusCodes.Status400BadRequest)]
         public async Task<Result<AuthenticateResponse>> RefreshToken([FromBody] AuthenticateResponse tokenElemnt)
         {
             var result = new FluentResults.Result<AuthenticateResponse>();
@@ -236,8 +236,8 @@ namespace AuthenticationMicroservice.Api.Controllers
 
         [AllowAnonymous]
         [HttpPost("revoke-token")]
-        //[ProducesResponseType(type: typeof(Result), statusCode: StatusCodes.Status200OK)]
-        //[ProducesResponseType(type: typeof(Result), statusCode: StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(type: typeof(Result), statusCode: StatusCodes.Status200OK)]
+        [ProducesResponseType(type: typeof(Result), statusCode: StatusCodes.Status400BadRequest)]
         public async Task<Result> RevokeToken(RevokeTokenRequest model)
         {
             var result = new FluentResults.Result();
@@ -411,8 +411,8 @@ namespace AuthenticationMicroservice.Api.Controllers
 
         [PermissionAuthorize(Core.Config.PermissionsConfig.Account.CanRead)]
         [HttpGet("get-all-user")]
-        //[ProducesResponseType(type: typeof(Result<IList<UserListViewModel>>), statusCode: StatusCodes.Status200OK)]
-        //[ProducesResponseType(type: typeof(Result), statusCode: StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(type: typeof(Result<IList<UserListViewModel>>), statusCode: StatusCodes.Status200OK)]
+        [ProducesResponseType(type: typeof(Result), statusCode: StatusCodes.Status400BadRequest)]
         public async Task<Result<IList<UserListViewModel>>> GetAllUser()
         {
             var result = new FluentResults.Result<IList<UserListViewModel>>();
@@ -453,8 +453,8 @@ namespace AuthenticationMicroservice.Api.Controllers
         //[PermissionAuthorize(Core.Config.PermissionsConfig.Account.CanRead)]
         [AllowAnonymous]
         [HttpGet("{id}/refresh-token")]
-        //[ProducesResponseType(type: typeof(Result<IList<UserListViewModel>>), statusCode: StatusCodes.Status200OK)]
-        //[ProducesResponseType(type: typeof(Result), statusCode: StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(type: typeof(Result<IList<UserListViewModel>>), statusCode: StatusCodes.Status200OK)]
+        [ProducesResponseType(type: typeof(Result), statusCode: StatusCodes.Status400BadRequest)]
         public async Task<Result<IList<RefreshToken>>> GetRefreshTokens(Guid id)
         {
             var result = new FluentResults.Result<IList<RefreshToken>>();
@@ -519,6 +519,58 @@ namespace AuthenticationMicroservice.Api.Controllers
             catch (Exception ex)
             {
                 result.WithError(errorMessage: ex.Message);
+            }
+            return result.ConvertToDtxResult();
+        }
+
+        [PermissionAuthorize(Core.Config.PermissionsConfig.Account.CanRead)]
+        [HttpPost("profile")]
+        [ProducesResponseType(type: typeof(Result<AuthenticateResponse>), statusCode: StatusCodes.Status200OK)]
+        [ProducesResponseType(type: typeof(Result), statusCode: StatusCodes.Status400BadRequest)]
+        public async Task<Result> ProfileUpdate([FromBody] ProfileViewModel profileData)
+        {
+            var result = new FluentResults.Result();
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    foreach (var error in ModelState.Values.SelectMany(modelState => modelState.Errors))
+                    {
+                        result.WithError(error.ErrorMessage);
+                    }
+                    return result.ConvertToDtxResult();
+                }
+
+                UserInformation userInformation = await DbContext.UserInformations.SingleOrDefaultAsync(u => u.UserId == profileData.UserId);
+                if (userInformation == null)
+                {
+                    result.WithError("User Information Not found!");
+                    return result.ConvertToDtxResult();
+                }
+                userInformation.Birthdate = profileData.Birthdate;
+                userInformation.FirstName = profileData.FirstName;
+                userInformation.LastName = profileData.LastName;
+                userInformation.Email = profileData.Email;
+                userInformation.Phone = profileData.Phone;
+                userInformation.Bio = profileData.Bio;
+                userInformation.Certifications = profileData.Certifications;
+                userInformation.Gender = profileData.Gender;
+                userInformation.Language = profileData.Language;
+                userInformation.SocialMediaLinks = profileData.SocialMediaLinks;
+                userInformation.Equipment = profileData.Equipment;
+
+                DbContext.UserInformations.Update(userInformation);
+                await DbContext.SaveChangesAsync();
+
+                result.WithSuccess(successMessage: "Profile updated successfully.");
+            }
+            catch (Exception ex)
+            {
+                result.WithError(errorMessage: ex.Message);
+                if (ex.InnerException != null && !string.IsNullOrEmpty(ex.InnerException.Message))
+                {
+                    result.WithError(ex.InnerException.Message);
+                }
             }
             return result.ConvertToDtxResult();
         }

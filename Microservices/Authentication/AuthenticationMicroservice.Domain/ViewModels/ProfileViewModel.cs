@@ -11,6 +11,9 @@ namespace AuthenticationMicroservice.Domain.ViewModels
     public class ProfileViewModel
     {
         [Required]
+        public System.Guid UserId { get; set; }
+
+        [Required]
         [MaxLength(50)]
         public string FirstName { get; set; }
 
