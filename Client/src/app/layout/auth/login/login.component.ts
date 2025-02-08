@@ -13,6 +13,7 @@ import { ValidationService } from 'src/app/services/common/validation.service';
 import { SnackbarComponent } from 'src/app/components/common/snackbar/snackbar.component';
 import { LoaderColor, LoaderType, MessageType } from 'src/app/models/enums/enums';
 import { ErrorHandleHelper } from 'src/app/infrastructure/helpers/error-handle.helper';
+import { CookieService } from 'ngx-cookie-service';
 
 @Component({
   selector: 'app-login',
@@ -34,6 +35,7 @@ export class LoginComponent implements OnInit {
     private router: Router,
     private activatedRoute: ActivatedRoute,
     private localStorageService: LocalStorageService,
+    private cookieService: CookieService,
     public snackbar: SnackbarComponent
   ) {
     this.loginForm = this.formBuilder.group({
@@ -100,6 +102,20 @@ export class LoginComponent implements OnInit {
             this.localStorageService.setInfo(new LocalStorageData<CurrentUser>("current-user", user));
             this.localStorageService.setInfo(new LocalStorageData<string>("token", result.value.token));
             this.localStorageService.setInfo(new LocalStorageData<string>("refresh-token", result.value.refreshToken));
+
+            //alert(result.value.fullName);
+            this.cookieService.set('full_name', result.value.fullName, {
+              path: '/',
+              domain: '.teamhiker.com',
+              secure: true,
+              sameSite: 'None'
+            });
+
+            // this.cookieService.set('full_name', result.value.fullName, {
+            //   path: '/',
+            //   secure: true,
+            //   sameSite: 'None'
+            // });
 
             window.location.href = this.returnUrl;
           } else {

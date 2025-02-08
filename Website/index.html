@@ -102,11 +102,14 @@
                     <a class="seperator-vertical">|</a>
                     <hr class="seperator-horizontal" />
                   </li>
-                  <li>
+                  <li id="idLogin">
                     <a class="page-scroll" href="https://app.teamhiker.com/auth/login?returnUrl=%2Fadmin%2Fdashboard">Login</a>
                   </li>
-                  <li>
+                  <li id="idRegister">
                     <a class="page-scroll" href="https://app.teamhiker.com/auth/register">Register</a>
+                  </li>
+                  <li id="idDashboard" style="display: none;">
+                    <a id="idLink" class="page-scroll" href="https://app.teamhiker.com/admin/dashboard">Welcome Full Name</a>
                   </li>
                 </ul>
               </div>
@@ -950,8 +953,11 @@
 
   <a href="#" class="back-to-top"><i class="fa fa-chevron-up"></i></a>
 
+  <iframe id="storageFrame" src="https://app.teamhiker.com/storage-helper.html" style="display: none;"></iframe>
+
   <!-- JavaScript Libraries -->
   <script src="lib/jquery/jquery.min.js"></script>
+  <script src="lib/jquery/jquery.cookie.min.js"></script>
   <script src="lib/bootstrap/js/bootstrap.min.js"></script>
   <script src="lib/owlcarousel/owl.carousel.min.js"></script>
   <script src="lib/venobox/venobox.min.js"></script>
@@ -969,7 +975,39 @@
 
   <script src="js/main.js"></script>
 
-  
+  <script>
+    var iframe = document.getElementById("storageFrame");
+    //console.log('Hi0');
+
+    iframe.onload = function() {
+        iframe.contentWindow.postMessage("getSessionToken", "https://app.teamhiker.com");
+        //console.log('Hi1');
+    };
+
+    window.addEventListener("message", function(event) {
+      //console.log('Hi2');
+        if (event.origin !== "https://app.teamhiker.com") {
+            return;
+        }
+
+        var user = event.data.user;
+        console.log(user);
+        if (user != undefined && user != null) {
+          var userData = JSON.parse(user);
+          var fullName = userData.fullName;
+          $('#idLink').text('Welcome ' + fullName);
+          $('#idDashboard').css('display', 'block');
+          $('#idLogin').css('display', 'none');
+          $('#idRegister').css('display', 'none');
+        } else {
+          $('#idLink').text('Welcome ...');
+          $('#idDashboard').css('display', 'none');
+          $('#idLogin').css('display', 'block');
+          $('#idRegister').css('display', 'block');
+        }
+
+    }, false);
+</script>
 
 </body>
 

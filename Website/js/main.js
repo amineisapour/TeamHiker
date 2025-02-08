@@ -209,4 +209,20 @@
     });
   }
 
+
+  // var fullName = $.cookie('full_name');
+  // if (fullName) {
+  //   fullName = fullName.replace('%20', ' '); 
+  //   $('#idLink').text('Welcome ' + fullName);
+  //   $('#idDashboard').css('display', 'block');
+  //   $('#idLogin').css('display', 'none');
+  //   $('#idRegister').css('display', 'none');
+  // } else {
+  //   $('#idLink').text('Welcome ...');
+  //   $('#idDashboard').css('display', 'none');
+  //   $('#idLogin').css('display', 'block');
+  //   $('#idRegister').css('display', 'block');
+  // }
+
+
 })(jQuery);

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Storage Helper</title>
+    <script>
+        window.addEventListener("message", function(event) {
+            // بررسی اینکه پیام از دامنه اصلی (`teamhiker.com`) ارسال شده است
+            if (event.origin !== "https://teamhiker.com") {
+                return;
+            }
+
+            // مقدار `session_token` را از localStorage خوانده و ارسال می‌کند
+            if (event.data === "getSessionToken") {
+                var user = localStorage.getItem("current-user") || null;
+                event.source.postMessage({ user: user }, event.origin);
+            }
+        }, false);
+    </script>
+</head>
+<body>
+    <p>Storage Helper</p>
+</body>
+</html>

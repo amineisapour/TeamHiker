@@ -8,6 +8,7 @@ import { AuthenticateData } from '../interfaces/authenticate-data.interface';
 import { LocalStorageService } from './common/local-storage.service';
 import { CurrentUser } from '../interfaces/current-user.interface';
 import { User } from '../models/users/user.model';
+import { CookieService } from 'ngx-cookie-service';
 
 
 @Injectable({
@@ -21,7 +22,8 @@ export class AccountService {
     constructor(
         private http: HttpClient,
         private settingsService: SettingsService,
-        private localStorageService: LocalStorageService
+        private localStorageService: LocalStorageService,
+        private cookieService: CookieService
     ) {
         this.httpOptions = this.settingsService.httpOptions;
         this.baseAuthenticationUrl = this.settingsService.baseAuthenticationUrl;
@@ -131,6 +133,9 @@ export class AccountService {
         this.localStorageService.clearInfo('token');
         this.localStorageService.clearInfo('current-user');
         this.localStorageService.clearInfo('refresh-token');
+
+        this.cookieService.delete('full_name', '/', '.teamhiker.com');
+        //this.cookieService.delete('full_name', '/');
     }
 
 }
