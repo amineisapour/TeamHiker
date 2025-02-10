@@ -828,22 +828,25 @@
               <div id="errormessage"></div>
               <form action="" method="post" class="contactForm">
                 <div class="form-group">
-                  <input type="text" name="name" class="form-control" id="name" placeholder="Your Name" data-rule="minlen:4" data-msg="Please enter at least 4 chars" />
+                  <input type="text" name="fullname" class="form-control" id="fullname" placeholder="Your Name" data-rule="minlen:3" data-msg="Please enter at least 3 chars" />
                   <div class="validation"></div>
                 </div>
                 <div class="form-group">
                   <input type="email" class="form-control" name="email" id="email" placeholder="Your Email" data-rule="email" data-msg="Please enter a valid email" />
                   <div class="validation"></div>
                 </div>
-                <div class="form-group">
-                  <input type="text" class="form-control" name="subject" id="subject" placeholder="Subject" data-rule="minlen:4" data-msg="Please enter at least 8 chars of subject" />
+                <div class="form-group" style="display: none;">
+                  <input type="text" value="" class="form-control" name="subject" id="subject" placeholder="Subject" data-msg="Please enter at least 8 chars of subject" />
                   <div class="validation"></div>
                 </div>
                 <div class="form-group">
                   <textarea class="form-control" name="message" id="message" rows="5" data-rule="required" data-msg="Please write something for us" placeholder="Message"></textarea>
                   <div class="validation"></div>
                 </div>
-                <div class="text-center"><button type="submit">Send Message</button></div>
+                <div class="text-center">
+                  <button style="display: inline;" id="btnSubmit" type="submit">Send Message</button>
+                  <img style="display: none;" id="imgLoading" width="45px" src="img/spinner.gif" >
+                </div>
               </form>
             </div>
           </div>
@@ -971,7 +974,7 @@
 
   <script src="https://smtpjs.com/v3/smtp.js"></script>
   <!-- Contact Form JavaScript File -->
-  <script src="contactform/contactform.js"></script>
+  <script src="contactform/contactform_new.js"></script>
 
   <script src="js/main.js"></script>
 
