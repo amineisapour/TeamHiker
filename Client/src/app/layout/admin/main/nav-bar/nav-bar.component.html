@@ -3,6 +3,10 @@
         src="assets/images/user/{{ (currentUser.gender == 'Woman') ? 'avatar_female.png' : 'avatar_male.png' }}">
     <div class="user-details">
         Welcome {{ currentUser.fullName }}
+        <!-- <button (click)="logout()">
+            <mat-icon>logout</mat-icon>
+            <span>Logout</span>
+        </button> -->
     </div>
 </div>
 <div class="tree-hr"></div>

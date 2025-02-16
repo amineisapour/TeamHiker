@@ -5,24 +5,28 @@
 </mat-form-field>
 
 <div class="mat-elevation-z8">
-    <table mat-table [dataSource]="dataSource" matSort>
+    <table mat-table matSort [dataSource]="dataSource">
 
         <!-- ID Column -->
-        <ng-container matColumnDef="id">
+        <!-- <ng-container matColumnDef="id">
             <th mat-header-cell *matHeaderCellDef mat-sort-header> ID </th>
             <td mat-cell *matCellDef="let row"> {{ row.id }} </td>
-        </ng-container>
+        </ng-container> -->
 
         <!-- Username Column -->
         <ng-container matColumnDef="username">
             <th mat-header-cell *matHeaderCellDef mat-sort-header> Username </th>
-            <td mat-cell *matCellDef="let row"> {{ row.username }} </td>
+            <td mat-cell *matCellDef="let row" class='m-card-title' data-label='Username'>
+                 {{ row.username }} 
+            </td>
         </ng-container>
 
         <!-- Gender Column -->
         <ng-container matColumnDef="gender">
             <th mat-header-cell *matHeaderCellDef mat-sort-header> Name </th>
-            <td mat-cell *matCellDef="let row"> {{ row.firstName + ' ' + row.lastName | getFullnameWithGender: row.gender }} </td>
+            <td mat-cell *matCellDef="let row" class='m-card-sub-title' data-label='Name'>
+                 {{ row.firstName + ' ' + row.lastName | getFullnameWithGender: row.gender }} 
+            </td>
         </ng-container>
 
         <!-- First Name Column -->
@@ -40,14 +44,18 @@
         <!-- Birthdate Column -->
         <ng-container matColumnDef="birthdate">
             <th mat-header-cell *matHeaderCellDef mat-sort-header> Birthdate </th>
-            <td mat-cell *matCellDef="let row"> {{ row.birthdate | getFormatDateTime: dateTimeFormat.YyyyMmDd }} </td>
+            <td mat-cell *matCellDef="let row" class='has_label_on_mobile' data-label='Birthdate'>
+                 {{ row.birthdate | getFormatDateTime: dateTimeFormat.YyyyMmDd }} 
+            </td>
         </ng-container>
 
         <!-- Register Time Column -->
         <ng-container matColumnDef="registerDateTime">
             <th mat-header-cell *matHeaderCellDef mat-sort-header> Register Time </th>
             <!-- <td mat-cell *matCellDef="let row"> {{ row.registerDateTime | getFormatDateTime: dateTimeFormat.YyyyMmDdHhMmSs }} </td> -->
-            <td mat-cell *matCellDef="let row"> {{ row.registerDateTime | date:'YYYY-MM-dd HH:mm:ss' }} </td>
+            <td mat-cell *matCellDef="let row"  class='has_label_on_mobile' data-label='Register Time'>
+                 {{ row.registerDateTime | date:'YYYY-MM-dd HH:mm:ss' }} 
+            </td>
         </ng-container>
 
         <!-- Active Column -->
@@ -60,7 +68,17 @@
             <!-- -->
         </ng-container>
 
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+         <!-- Symbol Column -->
+        <!-- <ng-container matColumnDef="star">
+            <th mat-header-cell *matHeaderCellDef> </th>
+            <td mat-cell *matCellDef="let element"> 
+            <button mat-icon-button [matMenuTriggerFor]="menu">
+                <mat-icon>more_vert</mat-icon>
+            </button>
+            </td>
+        </ng-container> -->
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns;"></tr>
         <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
 
         <!-- Row shown when there is no matching data. -->
@@ -69,7 +87,22 @@
         </tr>
     </table>
 
-    <mat-paginator [pageSize]="2" [pageSizeOptions]="[2, 4, 8, 10 ,100]" aria-label="Select page of users">
+    <mat-paginator [pageSize]="10" [pageSizeOptions]="[2, 4, 8, 10 ,100]" aria-label="Select page of users">
     </mat-paginator>
 </div>
 <br>
+
+<!-- <mat-menu #menu="matMenu">
+    <button mat-menu-item>
+      <mat-icon>open_in_new</mat-icon>
+      <span>Open risk plan</span>
+    </button>
+    <button mat-menu-item>
+      <mat-icon>undo</mat-icon>
+      <span>Reset questionnairre</span>
+    </button>
+    <button mat-menu-item disabled>
+      <mat-icon>delete</mat-icon>
+      <span>Delete questionnairre</span>
+    </button>
+  </mat-menu> -->

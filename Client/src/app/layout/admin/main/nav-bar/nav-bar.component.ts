@@ -4,6 +4,7 @@ import * as Interfaces from 'src/app/interfaces/menu-item.interface';
 import { CurrentUser } from 'src/app/interfaces/current-user.interface';
 import { AccountService } from 'src/app/services/account.service';
 import { NavigationHelper } from 'src/app/infrastructure/helpers/navigation.helper';
+import { DialogBoxService } from 'src/app/services/common/dialog-box.service';
 
 
 @Component({
@@ -20,7 +21,8 @@ export class NavBarComponent implements OnInit {
 
   public constructor(
     private accountService: AccountService,
-    public nav: NavigationHelper
+    public nav: NavigationHelper,
+    private dialogService: DialogBoxService
   ) {
     this.currentUser = this.accountService.getCurrentUser();
 
@@ -51,5 +53,13 @@ export class NavBarComponent implements OnInit {
   ngOnInit(): void { }
 
   public trackByFn = (index: number, item: any) => item;
+
+  logout(): void {
+    //const dialogRef = this.dialogService.openDialog(dialogData, { disableClose: true });
+    const dialogRef = this.dialogService.openDialog(
+      'Do you want to logout?',
+      'Lougout'
+    );
+  }
 
 }

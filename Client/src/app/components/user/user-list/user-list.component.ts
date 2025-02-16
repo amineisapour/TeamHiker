@@ -18,7 +18,8 @@ import { ErrorHandleHelper } from 'src/app/infrastructure/helpers/error-handle.h
 export class UserListComponent implements OnInit {
 
   dateTimeFormat: typeof DateTimeFormat = DateTimeFormat;
-  displayedColumns: string[] = ['id', 'username', 'gender', 'birthdate', 'registerDateTime', 'isActive'];
+  //displayedColumns: string[] = ['id', 'username', 'gender', 'birthdate', 'registerDateTime', 'isActive'];
+  displayedColumns: string[] = ['username', 'gender', 'birthdate', 'registerDateTime', 'isActive'];
   dataSource: MatTableDataSource<User>;
 
   @ViewChild(MatPaginator) paginator: MatPaginator | any;

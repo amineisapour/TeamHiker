@@ -71,11 +71,11 @@
       ],
       "UpstreamPathTemplate": "/gateway/auth/all-user",
       "UpstreamHttpMethod": [ "Get" ],
-      "AuthenticationOptions": {
-        "AuthenticationProviderKey": "Bearer",
-        "AllowedScopes": []
-      },
-      "FileCacheOptions": { "TtlSeconds": 5 }
+      //"AuthenticationOptions": {
+      //  "AuthenticationProviderKey": "Bearer",
+      //  "AllowedScopes": []
+      //},
+      //"FileCacheOptions": { "TtlSeconds": 5 }
     },
     {
       "DownstreamPathTemplate": "/api/account/get-user/{id}",
@@ -99,7 +99,7 @@
       //  "PeriodTimespan": 1,
       //  "Limit": 1
       //},
-      "FileCacheOptions": { "TtlSeconds": 30 }
+      //"FileCacheOptions": { "TtlSeconds": 30 }
     },
     {
       "DownstreamPathTemplate": "/api/account/test",
